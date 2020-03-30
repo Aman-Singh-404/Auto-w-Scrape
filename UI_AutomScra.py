@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/mrsaie/Desktop/AutomScra/AutomScra.ui'
+# Form implementation generated from reading ui file '/home/aman/Desktop/AutomScra/AutomScra.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.1
 #
@@ -91,7 +91,7 @@ class Ui_MainWindow(object):
         self.treeSA.setWidget(self.scrollAreaWidgetContents)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menubar.setNativeMenuBar(False)
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
@@ -109,24 +109,18 @@ class Ui_MainWindow(object):
         self.actionSave.setObjectName("actionSave")
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
-        self.actionFrame = QtWidgets.QAction(MainWindow)
-        self.actionFrame.setObjectName("actionFrame")
         self.actionUrls = QtWidgets.QAction(MainWindow)
         self.actionUrls.setObjectName("actionUrls")
-        self.actionsavetofile = QtWidgets.QAction(MainWindow)
-        self.actionsavetofile.setObjectName("actionsavetofile")
-        self.actionsavetootherfile = QtWidgets.QAction(MainWindow)
-        self.actionsavetootherfile.setObjectName("actionsavetootherfile")
-        self.actionsavetoDataBase = QtWidgets.QAction(MainWindow)
-        self.actionsavetoDataBase.setObjectName("actionsavetoDataBase")
+        self.actionsaveExcel = QtWidgets.QAction(MainWindow)
+        self.actionsaveExcel.setObjectName("actionsaveExcel")
+        self.actionsaveDB = QtWidgets.QAction(MainWindow)
+        self.actionsaveDB.setObjectName("actionsaveDB")
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionExit)
-        self.menuExceute.addAction(self.actionsavetofile)
-        self.menuExceute.addAction(self.actionsavetootherfile)
-        self.menuExceute.addAction(self.actionsavetoDataBase)
-        self.menuEdit.addAction(self.actionFrame)
+        self.menuExceute.addAction(self.actionsaveExcel)
+        self.menuExceute.addAction(self.actionsaveDB)
         self.menuEdit.addAction(self.actionUrls)
         self.menuEdit.addAction(self.menuExceute.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
@@ -159,8 +153,6 @@ class Ui_MainWindow(object):
         self.actionSave.setShortcut(_translate("MainWindow", "Ctrl+S"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionExit.setShortcut(_translate("MainWindow", "Ctrl+X"))
-        self.actionFrame.setText(_translate("MainWindow", "Manage Frame"))
         self.actionUrls.setText(_translate("MainWindow", "Manage Urls"))
-        self.actionsavetofile.setText(_translate("MainWindow", "Save into file"))
-        self.actionsavetootherfile.setText(_translate("MainWindow", "Save into other file"))
-        self.actionsavetoDataBase.setText(_translate("MainWindow", "Save to DataBase"))
+        self.actionsaveExcel.setText(_translate("MainWindow", "Save into Excel"))
+        self.actionsaveDB.setText(_translate("MainWindow", "Save into DataBase"))

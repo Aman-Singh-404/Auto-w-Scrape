@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/mrsaie/Desktop/AutomScra/actionNode.ui'
+# Form implementation generated from reading ui file '/home/aman/Desktop/AutomScra/actionNode.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.1
 #
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_Dialog(object):
-    def setupUi(self, Dialog, maxLevel):
+    def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(350, 130)
         Dialog.setMinimumSize(QtCore.QSize(350, 130))
@@ -51,19 +51,16 @@ class Ui_Dialog(object):
         self.valueLE.setGeometry(QtCore.QRect(85, 65, 260, 30))
         self.valueLE.setObjectName("valueLE")
 
-        self.retranslateUi(Dialog, maxLevel)
-        self.buttonBox.accepted.connect(Dialog.accept)
+        self.retranslateUi(Dialog)
         self.buttonBox.rejected.connect(Dialog.reject)
+        self.buttonBox.accepted.connect(Dialog.accept)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    def retranslateUi(self, Dialog, maxLevel):
+    def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        Dialog.setWindowTitle(_translate("Dialog", "Action Node"))
         self.label_1.setText(_translate("Dialog", "Level:"))
         self.label_2.setText(_translate("Dialog", "Action:"))
         self.label_3.setText(_translate("Dialog", "Value:"))
-        for i in range(maxLevel):
-            self.levelCB.addItem("")
-            self.levelCB.setItemText(i, _translate("Dialog", "Level " + str(i+1)))
         self.actionCB.setItemText(0, _translate("Dialog", "Click"))
         self.actionCB.setItemText(1, _translate("Dialog", "Time"))
