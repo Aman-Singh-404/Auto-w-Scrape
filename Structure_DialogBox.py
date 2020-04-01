@@ -10,7 +10,9 @@ class DialogBox:
     def getAction(self, levels):
         dialog = QtWidgets.QDialog(self.parent)
         dialog.ui = actionD()
-        dialog.ui.setupUi(dialog, levels)
+        dialog.ui.setupUi(dialog)
+        for i in range(levels):
+            dialog.ui.levelCB.addItem("Level " + str(i + 1))
         if dialog.exec_():  # and dialog.ui.valueLE.text() != "":
             level = int(
                 ''.join(x for x in dialog.ui.levelCB.currentText() if x.isdigit())) - 1

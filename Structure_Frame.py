@@ -33,6 +33,7 @@ class Frame(QtWidgets.QFrame):
         self.show()
 
     def clearAll(self):
+        self.mwindow.save_flag = True
         self.mwindow.tree.removeAllNode()
 
     def connecterdown(self):
@@ -109,6 +110,17 @@ class Frame(QtWidgets.QFrame):
         if faulter[1] != [] and self.lines[label][1].connectedEnds == []:
             self.lines[label][1] = None
         self.connectorSelection(QtCore.QPoint(0, 0))
+        self.mwindow.save_flag = True
+    
+    def getStat(self):
+        stat = {}
+        for label, conn in self.lines.items():
+            stat[label] = [None, None]
+            if conn[0] != None:
+                stat[label][0] = conn[0].getStat()
+            if conn[1] != None:
+                stat[label][1] = conn[1].getStat()
+        return stat
 
     def indicateLabel(self, label, pos):
         self.state = (self.state + 1) % 3
@@ -124,6 +136,7 @@ class Frame(QtWidgets.QFrame):
                 self.lines[self.label][1].connectedEnds.append(label)
                 self.lines[label][0].connectedEnds.append(self.label)
                 self.mwindow.tree.setRelations(self.label, label)
+                self.mwindow.save_flag = True
             self.update()
             self.state = (self.state + 1) % 3
             self.label = ""
@@ -151,6 +164,8 @@ class Frame(QtWidgets.QFrame):
         if self.state == 1:
             self.move_line = QtCore.QLine(self.lbl_pos, event.pos())
             self.update()
+        else:
+            self.lbl_pos = event.pos()
 
     def mousePressEvent(self, event):
         if self.ctrl_flag and self.mwindow.connect_flag:
@@ -174,6 +189,18 @@ class Frame(QtWidgets.QFrame):
             self.lines[key] = [None, None]
         self.update()
         self.mwindow.tree.removeAllRelations()
+        self.mwindow.save_flag = True
+    
+    def setStat(self, stat):
+        for label, conn in stat.items():
+            self.lines[label] = [None, None]
+            if conn[0] != None:
+                self.lines[label][0] = Connector(conn[0]['inherit'], QtCore.QPoint(conn[0]['pos'][0], conn[0]['pos'][1]))
+                self.lines[label][0].connectedEnds = conn[0]['connectedEnds']
+            if conn[1] != None:
+                self.lines[label][1] = Connector(conn[1]['inherit'], QtCore.QPoint(conn[1]['pos'][0], conn[1]['pos'][1]))
+                self.lines[label][1].connectedEnds = conn[1]['connectedEnds']
+        self.update()
 
     def updateconnector(self, update_list):
         for item in update_list:

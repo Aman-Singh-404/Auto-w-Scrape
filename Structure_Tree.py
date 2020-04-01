@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
 from Structure_Label import Label
+import datetime
 
 
 class Tree:
@@ -138,7 +139,18 @@ class Tree:
             level_items, key=lambda element: element[1], reverse=False)
         level_items = [item[0] for item in level_items]
         return level_items
-
+    
+    def getStat(self):
+        stat = {}
+        stat['action'] = self.action
+        stat['data'] = self.data
+        stat['head'] = {}
+        for label, item in self.Head.items():
+            stat['head'][label] = item.getStat()
+        stat['input'] = self.input
+        stat['maxlevel'] = self.maxLevel
+        return stat
+    
     def removeAllNode(self):
         for _, label in self.Head.items():
             label.hide()
@@ -196,3 +208,16 @@ class Tree:
             self.height = treeSA.size().height()
         for i in range(self.maxLevel + 1):
             self.adjustTreePosition(i, False)
+        self.frame.mwindow.save_flag = True
+    
+    def setStat(self, stat):
+        self.action = stat['action']
+        self.data = stat['data']
+        for label, item in stat['head'].items():
+            self.Head[label] = Label([self.frame, self] + item['args'])
+            self.Head[label].childs = item['childs']
+            self.Head[label].parents = item['parents']
+            self.Head[label].order = datetime.datetime.strptime(item['order'], '%Y-%m-%d %H:%M:%S.%f')
+        self.input = stat['input']
+        self.maxLevel = stat['maxlevel']
+        self.setRelativeSize()

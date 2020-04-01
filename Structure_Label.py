@@ -56,13 +56,21 @@ class Label(QtWidgets.QLabel):
     def contextMenuEvent(self, event):
         if self.conn_flag:
             self.menu.popup(QtGui.QCursor.pos())
+    
+    def getStat(self):
+        stat = {}
+        stat['args'] = [self.text(), self.pos().x(), self.pos().y(), self.method, self.level] + self.attribute
+        stat['childs'] = self.childs
+        stat['parents'] = self.parents
+        stat['order'] = str(self.order)
+        return stat
 
     def mouseDoubleClickEvent(self, event):
         if self.conn_flag:
             self.tree.changeNode(self.text())
 
     def mousePressEvent(self, event):
-        if not self.parent().parent().parent().parent().parent().connect_flag:
+        if not self.conn_flag:
             self.parent().indicateLabel(self.objectName(), self.pos())
         self.tree.clearSelection(self.text())
         if self.border_flag or event.button() == QtCore.Qt.RightButton or not self.conn_flag or not self.ctrl_signal:

@@ -38,6 +38,17 @@ class Connector(QtCore.QRect):
             painter.setPen(QtCore.Qt.black)
             painter.drawText(self, QtCore.Qt.AlignHCenter |
                              QtCore.Qt.AlignVCenter, self.text)
+    
+    def getStat(self):
+        stat = {}
+        stat['connectedEnds'] = self.connectedEnds
+        if self.text == 'P':
+            stat['inherit'] = 'parent'
+            stat['pos'] = [self.topLeft().x() - 10, self.topLeft().y() + 30]
+        else:
+            stat['inherit'] = 'child'
+            stat['pos'] = [self.topLeft().x() - 10, self.topLeft().y() - 50]
+        return stat
 
     def updateConnector(self, pos):
         if self.text == "P":

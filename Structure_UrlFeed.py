@@ -50,8 +50,11 @@ class UrlFeed(QtWidgets.QDialog):
         self.accept()
 
     def openBrowse(self):
-        self.filepath, _ = QtWidgets.QFileDialog.getOpenFileName(
+        files, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Select file", "", self.extension)
+        if files == '':
+            return None
+        self.filepath = files
         if len(os.path.split(self.filepath)[1]) > 15:
             self.ui.browseL.setText(os.path.split(self.filepath)[1][:15]+"...")
         else:
