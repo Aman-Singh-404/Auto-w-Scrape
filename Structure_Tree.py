@@ -1,7 +1,8 @@
+import datetime
+
 from PyQt5 import QtCore, QtWidgets
 
 from Structure_Label import Label
-import datetime
 
 
 class Tree:
@@ -33,8 +34,7 @@ class Tree:
             self.height = y + label + height_spacing
 
         if (label + width_spacing) * no_of_ele + width_spacing < self.width:
-            x = (self.width - (label + width_spacing)
-                 * no_of_ele - width_spacing) / 2
+            x = (self.width - (label + width_spacing) * no_of_ele - width_spacing) / 2
         else:
             self.width = (label + width_spacing) * no_of_ele + width_spacing
 
@@ -83,10 +83,8 @@ class Tree:
                 faulter[1].append(item)
         if faulter == [[], []]:
             return True
-        message = "Element has connector(s) in level " + \
-            str(level + 1) + ".\nDo you want to update?"
-        reply = QtWidgets.QMessageBox.question(
-            self.frame, 'Alert', message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        message = "Element has connector(s) in level " + str(level + 1) + ".\nDo you want to update?"
+        reply = QtWidgets.QMessageBox.question(self.frame, 'Alert', message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
             self.frame.deleteConnector(label, faulter)
             return True
@@ -116,8 +114,7 @@ class Tree:
         x, y = self.adjustTreePosition(attribute[0])
         if self.maxLevel < attribute[0]:
             self.maxLevel += 1
-        self.Head[name] = Label(
-            [self.frame, self, name, x, y, method] + attribute)
+        self.Head[name] = Label([self.frame, self, name, x, y, method] + attribute)
         self.frame.lines[name] = [None, None]
 
     def ctrlOff(self, flag):
@@ -126,20 +123,37 @@ class Tree:
 
     def enableLabel(self, flag):
         for key, value in self.Head.items():
-            value.setStyleSheet(
-                "border: 1px solid rgb(0, 0, 0); border-radius: 5%;")
+            value.setStyleSheet("border: 1px solid rgb(0, 0, 0); border-radius: 5%;")
             value.conn_flag = flag
+
+    def getAllPath(self):
+        for key, label in self.Head.items():
+            if label.level != 0 and label.parents == []:
+                QtWidgets.QMessageBox.warning(self.frame, 'Alert', "Some labels have no parents [Excluding Level 1 nodes].")
+                return None
+        paths = []
+        for child in self.getLevelItems(0):
+            paths += self.getPaths(child)
+        return paths
 
     def getLevelItems(self, level):
         level_items = []
         for key, value in self.Head.items():
             if value.level == level:
                 level_items.append([key, value.order])
-        level_items = sorted(
-            level_items, key=lambda element: element[1], reverse=False)
+        level_items = sorted(level_items, key=lambda element: element[1], reverse=False)
         level_items = [item[0] for item in level_items]
         return level_items
-    
+
+    def getPaths(self, node):
+        paths = []
+        if self.Head[node].childs == []:
+            return [[node]]
+        for child in self.Head[node].childs:
+            for p in self.getPaths(child):
+                paths.append([node] + p)
+        return paths
+
     def getStat(self):
         stat = {}
         stat['action'] = self.action
@@ -150,7 +164,7 @@ class Tree:
         stat['input'] = self.input
         stat['maxlevel'] = self.maxLevel
         return stat
-    
+
     def removeAllNode(self):
         for _, label in self.Head.items():
             label.hide()
@@ -176,12 +190,10 @@ class Tree:
             reply = None
             if len(self.getLevelItems(self.Head[key].level)) == 1:
                 message = "This is last element of this level.\nDo you want to delete it?"
-                reply = QtWidgets.QMessageBox.question(
-                    self.frame, 'Alert', message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+                reply = QtWidgets.QMessageBox.question(self.frame, 'Alert', message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
             if reply == QtWidgets.QMessageBox.No:
                 continue
-            self.frame.deleteConnector(
-                key, [value.parents.copy(), value.childs.copy()])
+            self.frame.deleteConnector(key, [value.parents.copy(), value.childs.copy()])
             value.hide()
             self.Head.pop(key)
             if reply != None:
@@ -209,7 +221,7 @@ class Tree:
         for i in range(self.maxLevel + 1):
             self.adjustTreePosition(i, False)
         self.frame.mwindow.save_flag = True
-    
+
     def setStat(self, stat):
         self.action = stat['action']
         self.data = stat['data']

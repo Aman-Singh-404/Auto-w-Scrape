@@ -49,14 +49,13 @@ class Label(QtWidgets.QLabel):
         self.show()
 
     def clear(self):
-        self.setStyleSheet(
-            "background: #EFEFEF; color: #000000;border: 1px solid #000000; border-radius: 5%;")
+        self.setStyleSheet("background: #EFEFEF; color: #000000;border: 1px solid #000000; border-radius: 5%;")
         self.border_flag = True
 
     def contextMenuEvent(self, event):
         if self.conn_flag:
             self.menu.popup(QtGui.QCursor.pos())
-    
+
     def getStat(self):
         stat = {}
         stat['args'] = [self.text(), self.pos().x(), self.pos().y(), self.method, self.level] + self.attribute
@@ -74,8 +73,7 @@ class Label(QtWidgets.QLabel):
             self.parent().indicateLabel(self.objectName(), self.pos())
         self.tree.clearSelection(self.text())
         if self.border_flag or event.button() == QtCore.Qt.RightButton or not self.conn_flag or not self.ctrl_signal:
-            self.setStyleSheet(
-                "background: #565656; color: #EFEFEF; border-radius: 5%;")
+            self.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
             self.border_flag = False
             self.tree.ctrlOff(True)
         else:

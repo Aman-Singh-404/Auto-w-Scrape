@@ -34,6 +34,7 @@ class Frame(QtWidgets.QFrame):
 
     def clearAll(self):
         self.mwindow.save_flag = True
+        self.removeAll()
         self.mwindow.tree.removeAllNode()
 
     def connecterdown(self):
@@ -57,7 +58,7 @@ class Frame(QtWidgets.QFrame):
                     state = 0
                 elif not conn[0].contains(pos) or label:
                     conn[0].selected = True
-            elif conn[1] != None:
+            if conn[1] != None:
                 if conn[1].contains(pos):
                     if self.current_conn == key:
                         conn[1].selected = not conn[1].selected
@@ -73,8 +74,7 @@ class Frame(QtWidgets.QFrame):
             self.current_conn = None
             return None, None, None
         for item in self.lines[select][state].connectedEnds:
-            self.lines[item][int(
-                not state)].selected = self.lines[select][state].selected
+            self.lines[item][int(not state)].selected = self.lines[select][state].selected
         self.update()
         return select, state, self.lines[select][state].connectedEnds
 
@@ -85,11 +85,9 @@ class Frame(QtWidgets.QFrame):
     def delete(self):
         if self.current_conn != None:
             if self.lines[self.current_conn][0] != None and not self.lines[self.current_conn][0].selected:
-                self.deleteConnector(self.current_conn, [
-                                     self.lines[self.current_conn][0].connectedEnds.copy(), []])
+                self.deleteConnector(self.current_conn, [self.lines[self.current_conn][0].connectedEnds.copy(), []])
             elif self.lines[self.current_conn][1] != None and not self.lines[self.current_conn][1].selected:
-                self.deleteConnector(self.current_conn, [
-                                     [], self.lines[self.current_conn][1].connectedEnds.copy()])
+                self.deleteConnector(self.current_conn, [[], self.lines[self.current_conn][1].connectedEnds.copy()])
             self.current_conn = None
 
     def deleteConnector(self, label, faulter):
@@ -111,7 +109,7 @@ class Frame(QtWidgets.QFrame):
             self.lines[label][1] = None
         self.connectorSelection(QtCore.QPoint(0, 0))
         self.mwindow.save_flag = True
-    
+
     def getStat(self):
         stat = {}
         for label, conn in self.lines.items():
@@ -144,8 +142,7 @@ class Frame(QtWidgets.QFrame):
             self.mwindow.connect_flag = True
         else:
             self.state = (self.state - 1) % 3
-            QtWidgets.QMessageBox.warning(
-                self, 'Alert', "Same or top level connectors are restricted.")
+            QtWidgets.QMessageBox.warning(self, 'Alert', "Same or top level connectors are restricted.")
 
     def mouseDoubleClickEvent(self, event):
         if self.ctrl_flag and self.mwindow.connect_flag:
@@ -190,7 +187,7 @@ class Frame(QtWidgets.QFrame):
         self.update()
         self.mwindow.tree.removeAllRelations()
         self.mwindow.save_flag = True
-    
+
     def setStat(self, stat):
         for label, conn in stat.items():
             self.lines[label] = [None, None]

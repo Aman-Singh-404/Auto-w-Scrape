@@ -1,7 +1,7 @@
 import json
+import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import os
 
 from Structure_DialogBox import DialogBox
 from Structure_Frame import Frame
@@ -32,8 +32,7 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         self.intialheight = self.size().height()
         self.intialwidth = self.size().width()
         self.dialogbox = DialogBox(self)
-        self.tree = Tree([self.treeF, self.treeF.size().width(),
-                          self.treeF.size().height(), self.dialogbox])
+        self.tree = Tree([self.treeF, self.treeF.size().width(), self.treeF.size().height(), self.dialogbox])
 
         self.actionNew.triggered.connect(self.newFile)
         self.actionOpen.triggered.connect(self.openFile)
@@ -41,13 +40,14 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.close)
         self.actionUrls.triggered.connect(self.importUrls)
         self.actionsaveExcel.triggered.connect(self.savetoExcel)
-        #self.actionsaveDB.triggered.connect(self.savetoDB)
+        # self.actionsaveDB.triggered.connect(self.savetoDB)
         self.addUrlPB.clicked.connect(self.addUrl)
         self.removeUrlPB.clicked.connect(self.removeUrl)
         self.action_nodePB.clicked.connect(self.actionNode)
         self.input_nodePB.clicked.connect(self.inputNode)
         self.data_nodePB.clicked.connect(self.dataNode)
         self.connectorPB.clicked.connect(self.connectNode)
+        self.executePB.clicked.connect(self.executeScript)
 
     def actionNode(self):
         levels = 0
@@ -67,25 +67,22 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         self.urlsTW.setItem(index - 1, 0, QtWidgets.QTableWidgetItem(url))
         self.save_flag = True
         self.empty_flag = False
-    
+
     def closeEvent(self, event):
         if self.save_flag:
-            reply = QtWidgets.QMessageBox.question(self, 'Alert', 'Your changes will be lost if you don’t save them.', QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Save, QtWidgets.QMessageBox.Cancel)
+            reply = QtWidgets.QMessageBox.question(self, 'Alert', 'Your changes will be lost if you don’t save them.',QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Save, QtWidgets.QMessageBox.Cancel)
             if reply == QtWidgets.QMessageBox.Save:
                 self.saveFile()
-                if self.saveto in self.controller.defaulter_files:
-                    self.controller.defaulter_files.remove(self.saveto)
+                self.controller.closeWindow(self)
                 event.accept()
             elif reply == QtWidgets.QMessageBox.Discard:
-                if self.saveto in self.controller.defaulter_files:
-                    self.controller.defaulter_files.remove(self.saveto)
+                self.controller.closeWindow(self)
                 event.accept()
             else:
                 event.ignore()
                 self.keyReleaseEvent(QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Control, QtCore.Qt.NoModifier, 0, 0, 0))
         else:
-            if self.saveto in self.controller.defaulter_files:
-                self.controller.defaulter_files.remove(self.saveto)
+            self.controller.closeWindow(self)
             event.accept()
 
     def connectNode(self):
@@ -108,6 +105,15 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tree.createNode("Data", attribute)
             self.save_flag = True
             self.empty_flag = False
+
+    def executeScript(self):
+        if self.save_flag:
+            reply = QtWidgets.QMessageBox.question(self, "Alert", "File is not saved.", QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Cancel, QtWidgets.QMessageBox.Cancel)
+            if reply == QtWidgets.QMessageBox.Save:
+                self.saveFile()
+            else:
+                return None
+        path_list = self.tree.getAllPath()
 
     def getStat(self):
         stat = {}
@@ -149,16 +155,17 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tree.ctrl_flag = True
             self.treeF.ctrl_flag = True
             self.tree.ctrlOff(False)
-    
+
     def newFile(self):
         self.controller.addWindow()
         self.keyReleaseEvent(QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Control, QtCore.Qt.NoModifier, 0, 0, 0))
 
     def openFile(self):
-        files, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", "", "Text Files(*.txt)")
+        files, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Select file", "", "Text Files(*.txt)")
         if files == '':
             return None
-        if self.empty_flag:
+        if self.empty_flag and files not in self.controller.defaulter_files:
             self.setStat(files)
             self.controller.reusable_titles.append(self.title)
             self.controller.defaulter_files.append(files)
@@ -180,17 +187,12 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         self.intialwidth = self.size().width()
         self.intialheight = self.size().height()
 
-        self.addUrlPB.move(self.addUrlPB.pos().x(),
-                           self.addUrlPB.pos().y() + incrementheight)
-        self.removeUrlPB.move(self.removeUrlPB.pos().x(),
-                              self.removeUrlPB.pos().y() + incrementheight)
-        self.executePB.move(self.executePB.pos().x(),
-                            self.executePB.pos().y() + incrementheight)
+        self.addUrlPB.move(self.addUrlPB.pos().x(), self.addUrlPB.pos().y() + incrementheight)
+        self.removeUrlPB.move(self.removeUrlPB.pos().x(), self.removeUrlPB.pos().y() + incrementheight)
+        self.executePB.move(self.executePB.pos().x(), self.executePB.pos().y() + incrementheight)
 
-        self.urlsTW.resize(self.urlsTW.size().width(),
-                           self.urlsTW.size().height() + incrementheight)
-        self.treeSA.resize(self.treeSA.size().width(
-        ) + incrementwidth, self.treeSA.size().height() + incrementheight)
+        self.urlsTW.resize(self.urlsTW.size().width(), self.urlsTW.size().height() + incrementheight)
+        self.treeSA.resize(self.treeSA.size().width() + incrementwidth, self.treeSA.size().height() + incrementheight)
 
         if (self.treeSA.size().width() - self.treeF.size().width()) * incrementwidth > 0:
             self.tree.width = self.treeSA.size().width()
@@ -205,7 +207,10 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             files, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", self.title, "Text Files(*.txt)")
             if files == '':
                 return None
-            self.saveto = files + '.txt'
+            if files in self.controller.defaulter_files:
+                QtWidgets.QMessageBox.warning(self, 'Alert', "File is already open.")
+                return None
+            self.saveto = os.path.splitext(files)[0] + '.txt'
             self.setWindowTitle(os.path.split(self.saveto)[1] + '- AutomScra')
             self.controller.reusable_titles.append(self.title)
             self.controller.defaulter_files.append(self.saveto)
@@ -219,12 +224,11 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         self.keyReleaseEvent(QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Control, QtCore.Qt.NoModifier, 0, 0, 0))
 
     def savetoExcel(self):
-        name = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Data", "untitled.xlsx", "Excel(*.xlsx)")
+        name = QtWidgets.QFileDialog.getSaveFileName(self, "Save Data", "untitled.xlsx", "Excel(*.xlsx)")
         self.saveDatato = [0, name]
         self.save_flag = True
         self.empty_flag = False
-    
+
     def setStat(self, files):
         try:
             stat = None
@@ -242,4 +246,3 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
             QtWidgets.QMessageBox.warning(self, 'Alert', "File is corrupted or does not exist.")
             self.saveto = files
             self.close()
-

@@ -33,12 +33,10 @@ class UrlFeed(QtWidgets.QDialog):
             return None
         if self.ui.fileRB.isChecked():
             if self.ui.separatorLE.text() == "":
-                QtWidgets.QMessageBox.warning(
-                    self, 'Alert', "Separator field is empty!")
+                QtWidgets.QMessageBox.warning(self, 'Alert', "Separator field is empty!")
                 return None
             else:
-                self.Urls = open(self.filepath, "r").read().replace(
-                    "\n", "").split(self.ui.separatorLE.text())
+                self.Urls = open(self.filepath, "r").read().replace("\n", "").split(self.ui.separatorLE.text())
                 self.Urls = [x for x in self.Urls if x]
         else:
             df = None
@@ -50,8 +48,7 @@ class UrlFeed(QtWidgets.QDialog):
         self.accept()
 
     def openBrowse(self):
-        files, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Select file", "", self.extension)
+        files, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", "", self.extension)
         if files == '':
             return None
         self.filepath = files
