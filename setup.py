@@ -1,13 +1,11 @@
-import sys
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from PyQt5 import QtWidgets
-
-from Structure_Window import Window
+from Structure.Window import Window
 
 
 class Controller:
     def __init__(self):
-        self.main_app = QtWidgets.QApplication(['No Configuration'])
+        self.main_app = QApplication(['No Configuration'])
         self.index = 1
         self.main_window = []
         self.reusable_titles = []
@@ -15,7 +13,7 @@ class Controller:
 
     def addWindow(self, open_file=''):
         if open_file in self.defaulter_files:
-            QtWidgets.QMessageBox.warning(None, 'Alert', "File is already open.")
+            QMessageBox.warning(None, 'Alert', "File is already open.")
             return None
         if self.reusable_titles != []:
             self.main_window.append(Window(self, self.reusable_titles[0]))
