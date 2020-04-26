@@ -1,6 +1,7 @@
 import re
 
 from PyQt5.QtWidgets import QDialog, QMessageBox
+from sqlalchemy import create_engine
 
 from Interface.UI_saveDB import Ui_Dialog
 
@@ -26,11 +27,7 @@ class SaveDB(QDialog):
     
     def run(self):
         if self.exec_():
-            str_engine = self.ui.dialectCB.currentText().strip() + "://"
-            str_engine += self.ui.userLE.text().strip() + ":"
-            str_engine += self.ui.passwordLE.text().strip() + "@"
-            str_engine += self.ui.hostportLE.text().strip() + "/"
-            str_engine += self.ui.dbLE.text().strip()
+            
             table = self.ui.tableLE.text()
             return [str_engine, table]
         self.show()
@@ -45,4 +42,16 @@ class SaveDB(QDialog):
         elif self.ui.tableLE.text() == "":
             QMessageBox.warning(self, "Alert", "Table can't be empty.")
         else:
-            self.accept()
+            try:
+                str_engine = self.ui.dialectCB.currentText().strip() + "://"
+                str_engine += self.ui.userLE.text().strip() + ":"
+                str_engine += self.ui.passwordLE.text().strip() + "@"
+                str_engine += self.ui.hostportLE.text().strip() + "/"
+                str_engine += self.ui.dbLE.text().strip()
+                engine = (str_engine)
+                conn = engine.connect()
+                conn.close()
+                engine.dispose()
+                self.accept()
+            except:
+                QMessageBox.warning(self, "Alert", "Database URL not found.")

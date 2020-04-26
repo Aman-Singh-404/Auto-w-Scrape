@@ -74,7 +74,7 @@ class DataNode(QDialog):
     
     def run(self):
         if self.exec_():
-            level = int(self.ui.levelCB.currentText()[1:]) - 1
+            level = int(self.ui.levelCB.currentText()[6:]) - 1
             file_type = self.ui.typeCB.currentText()
             tag = self.ui.tagLE.text()
             return [level, file_type, tag, self.path]

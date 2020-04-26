@@ -58,7 +58,7 @@ class ActionNode(QDialog):
     
     def run(self):
         if self.exec_():
-            level = int(self.ui.levelCB.currentText()[1:]) - 1
+            level = int(self.ui.levelCB.currentText()[6:]) - 1
             action = self.ui.actionCB.currentText()
             value = self.ui.valueLE.text()
             return [level, action, value]

@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QLine, QPoint
 from PyQt5.QtGui import QCursor, QPainter
-from PyQt5.QtWidgets import QFrame, QMenu, QAction, QMessageBox
+from PyQt5.QtWidgets import QAction, QFrame, QMenu, QMessageBox
 
 from Structure.Connector import Connector
 from Structure.ConnectorView import ConnectorView

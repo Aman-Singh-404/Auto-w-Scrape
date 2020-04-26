@@ -9,9 +9,9 @@ from Interface.UI_AutomScra import Ui_MainWindow
 from Structure.DialogBox import DialogBox
 from Structure.Frame import Frame
 from Structure.ProgressView import ProgressView
+from Structure.SaveDB import SaveDB
 from Structure.Tree import Tree
 from Structure.UrlFeed import UrlFeed
-from Structure.SaveDB import SaveDB
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -45,13 +45,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.actionUrls.triggered.connect(self.importUrls)
         self.actionsaveExcel.triggered.connect(self.savetoExcel)
         self.actionsaveDB.triggered.connect(self.savetoDB)
-        self.actionExecute.triggered.connect(self.executeScript)
         self.addUrlPB.clicked.connect(self.addUrl)
         self.removeUrlPB.clicked.connect(self.removeUrl)
         self.action_nodePB.clicked.connect(self.actionNode)
         self.input_nodePB.clicked.connect(self.inputNode)
         self.data_nodePB.clicked.connect(self.dataNode)
         self.connectorPB.clicked.connect(self.connectNode)
+        self.executePB.clicked.connect(self.executeScript)
         self.urlsTW.itemChanged.connect(self.focusItem)
 
     def actionNode(self):
@@ -118,7 +118,7 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.saveFile()
             else:
                 return None
-        path_list = self.tree.getAllPath()
+        path_list, header = self.tree.getAllPath()
         url_list = []
         for i in range(self.urlsTW.rowCount()):
             url = self.urlsTW.item(i, 0).text().lower()
@@ -131,9 +131,9 @@ class Window(QMainWindow, Ui_MainWindow):
         if url_list == []:
             QMessageBox.warning(self, 'Alert', "URL bin is empty.")
         elif self.saveDatato == None:
-            QMessageBox.warning(Self, "Alert", "Location and mode for data saving is not selected")
+            QMessageBox.warning(self, "Alert", "Location and mode for data saving is not selected")
         elif path_list != []:
-            progressview = ProgressView(self, path_list, url_list, self.saveDatato)
+            progressview = ProgressView(self, path_list, url_list, self.saveDatato, header)
             progressview.exec()
     
     def focusItem(self, item):
@@ -213,6 +213,8 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.addUrlPB.move(self.addUrlPB.pos().x(), self.addUrlPB.pos().y() + incrementheight)
         self.removeUrlPB.move(self.removeUrlPB.pos().x(), self.removeUrlPB.pos().y() + incrementheight)
+        self.executePB.move(self.executePB.pos().x(), self.executePB.pos().y() + incrementheight)
+        
 
         self.urlsTW.resize(self.urlsTW.size().width(), self.urlsTW.size().height() + incrementheight)
         self.treeSA.resize(self.treeSA.size().width() + incrementwidth, self.treeSA.size().height() + incrementheight)

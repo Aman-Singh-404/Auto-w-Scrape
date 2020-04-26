@@ -65,7 +65,7 @@ class InputNode(QDialog):
     
     def run(self):
         if self.exec_():
-            level = int(self.ui.levelCB.currentText()[1:]) - 1
+            level = int(self.ui.levelCB.currentText()[6:]) - 1
             tag = self.ui.tagLE.text()
             value = self.ui.valueTE.toPlainText()
             return [level, tag_type, tag, value]

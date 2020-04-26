@@ -137,15 +137,18 @@ class Tree:
     def getAllPath(self):
         if self.Head == {}:
             QMessageBox.warning(self.frame, 'Alert', "Frame is empty.")
-            return None
+            return None, []
+        header = []
         for key, label in self.Head.items():
             if label.level != 0 and label.parents == []:
                 QMessageBox.warning(self.frame, 'Alert', "Some labels have no parents [Excluding Level 1 nodes].")
-                return None
+                return None, []
+            if label.text()[0] == "D":
+                header.append(label.text())
         paths = []
         for child in self.getLevelItems(0):
             paths += self.getPaths(child)
-        return paths
+        return paths, header
 
     def getLevelItems(self, level):
         level_items = []

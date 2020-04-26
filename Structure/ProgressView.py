@@ -11,7 +11,7 @@ from Structure.Driver import Driver
 
 
 class ProgressView(QDialog):
-    def __init__(self, parent, pathlist, urllist, saveto):
+    def __init__(self, parent, pathlist, urllist, saveto, header):
         QDialog.__init__(self, parent=parent)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
@@ -20,6 +20,7 @@ class ProgressView(QDialog):
         self.pathlist = pathlist
         self.urllist = urllist
         self.saveto = saveto
+        self.header = header
         
         self.ui.closePB.clicked.connect(self.reject)
         self.ui.executePB.clicked.connect(self.execute)
@@ -76,6 +77,13 @@ class ProgressView(QDialog):
             try:
                 driver = Driver(browser, path, self.pathlist, self.urllist)
                 datamatrix = driver.execute()
+                for i in range(len(datamatrix)):
+                    if type(datamatrix[i][1]) == str:
+                        data_dict = {}
+                        for key in self.header:
+                            data_dict[key] = [datamatrix[i][1]]
+                        datamatrix[i][1] = data_dict
+                print(datamatrix)
                 
                 df_total = pd.DataFrame(datamatrix[0][1])
                 df_total.insert(0, 'URL', datamatrix[0][0])
@@ -85,16 +93,16 @@ class ProgressView(QDialog):
                     df_total.append(df, ignore_index=True)
                 if self.saveto[0]:
                     engine = create_engine(self.saveto[1])
-                    df_total.to_sql(self.saveto[2], engine.connect())
+                    conn = engine.connect()
+                    df_total.to_sql(self.saveto[2], conn)
+                    conn.close()
+                    db.dispose()
                 else:
                     df_total.to_excel(self.saveto[1], index=False)
                 QMessageBox.about(self, "Information", "Process is completed.")
                 self.accept()
             except NoSuchWindowException:
                 QMessageBox.warning(self, "Alert", "Browser has beeen stop working.")
-                self.reject()
-            except:
-                QMessageBox.warning(self, "Alert", "File can't be placed due to incorrect path or url.")
                 self.reject()
         else:
             self.reject()
