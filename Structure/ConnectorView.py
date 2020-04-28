@@ -34,7 +34,7 @@ class ConnectorView(QDialog):
         if x + self.label + self.spacing > self.spanF.size().width():
             self.spanF.setFixedSize(x + self.label + self.spacing, self.spanF.size().height())
         label.setGeometry(QRect(x, 10, self.label, self.label))
-        font = QtGui.QFont()
+        font = QFont()
         font.setPointSize(14)
         label.setFont(font)
         label.setAlignment(Qt.AlignCenter)
