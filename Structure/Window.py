@@ -32,6 +32,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.connect_flag = True
         self.saveDatato = None
         self.saveto = None
+        self.progress = 0
 
         self.intialheight = self.size().height()
         self.intialwidth = self.size().width()
@@ -53,6 +54,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.connectorPB.clicked.connect(self.connectNode)
         self.executePB.clicked.connect(self.executeScript)
         self.urlsTW.itemChanged.connect(self.focusItem)
+        #self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
     def actionNode(self):
         levels = 0
@@ -70,8 +72,6 @@ class Window(QMainWindow, Ui_MainWindow):
         index = self.urlsTW.rowCount() + 1
         self.urlsTW.setRowCount(index)
         self.urlsTW.setItem(index - 1, 0, QTableWidgetItem(url))
-        self.save_flag = True
-        self.empty_flag = False
 
     def closeEvent(self, event):
         if self.save_flag:
@@ -113,9 +113,16 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def executeScript(self):
         if self.save_flag:
-            reply = QMessageBox.question(self, "Alert", "File is not saved.", QMessageBox.Save | QMessageBox.Cancel, QMessageBox.Cancel)
+            reply = QMessageBox.question(self, "Alert", "File is not saved.", QMessageBox.Cancel | QMessageBox.Save, QMessageBox.Cancel)
             if reply == QMessageBox.Save:
                 self.saveFile()
+            else:
+                return None
+        if self.progress == 100:
+            reply = QMessageBox.question(self, "Alert", "Do you want to  execute again.", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self.progress = 0
+                self.save_flag = True
             else:
                 return None
         path_list, header = self.tree.getAllPath()
@@ -133,15 +140,20 @@ class Window(QMainWindow, Ui_MainWindow):
         elif self.saveDatato == None:
             QMessageBox.warning(self, "Alert", "Location and mode for data saving is not selected")
         elif path_list != []:
-            progressview = ProgressView(self, path_list, url_list, self.saveDatato, header)
-            progressview.exec()
+            progressview = ProgressView(self, path_list, url_list, self.saveDatato, header, self.progress)
+            progress = progressview.run()
+            if progress != None and progress != self.progress:
+                self.progress = progress
+                self.save_flag = True
     
     def focusItem(self, item):
         self.save_flag = True
+        self.empty_flag = False
 
     def getStat(self):
         stat = {}
         stat['frame'] = self.treeF.getStat()
+        stat['progress'] = self.progress
         stat['saveDatato'] = self.saveDatato
         stat['tree'] = self.tree.getStat()
         stat['urls'] = []
@@ -185,16 +197,16 @@ class Window(QMainWindow, Ui_MainWindow):
         self.keyReleaseEvent(QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0))
 
     def openFile(self):
-        files, _ = QFileDialog.getOpenFileName(
-            self, "Select file", "", "Text Files(*.txt)")
+        files, _ = QFileDialog.getOpenFileName(self, "Select file", "", "Text Files(*.txt)")
         if files == '':
             return None
-        if self.empty_flag and files not in self.controller.defaulter_files:
-            self.setStat(files)
-            self.controller.reusable_titles.append(self.title)
-            self.controller.defaulter_files.append(files)
-        else:
-            self.controller.addWindow(files)
+        if not self.controller.check('defaulter_files', files):
+            if self.empty_flag:
+                self.setStat(files)
+                self.controller.setValue('reusable_titles', self.title)
+                self.controller.setValue('defaulter_files', files)
+            else:
+                self.controller.addWindow(files)
         self.keyReleaseEvent(QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0))
 
     def removeUrl(self):
@@ -202,8 +214,6 @@ class Window(QMainWindow, Ui_MainWindow):
         indices.reverse()
         for i in indices:
             self.urlsTW.removeRow(i)
-        self.save_flag = True
-        self.empty_flag = False
 
     def resizeEvent(self, event):
         incrementwidth = self.size().width() - self.intialwidth
@@ -232,13 +242,13 @@ class Window(QMainWindow, Ui_MainWindow):
             files, _ = QFileDialog.getSaveFileName(self, "Save File", self.title, "Text Files(*.txt)")
             if files == '':
                 return None
-            if files in self.controller.defaulter_files:
+            if self.controller.check('defaulter_files', files):
                 QMessageBox.warning(self, 'Alert', "File is already open.")
                 return None
             self.saveto = os.path.splitext(files)[0] + '.txt'
             self.setWindowTitle(os.path.split(self.saveto)[1] + '- AutomScra')
-            self.controller.reusable_titles.append(self.title)
-            self.controller.defaulter_files.append(self.saveto)
+            self.controller.setValue('reusable_titles', self.title)
+            self.controller.setValue('defaulter_files', self.saveto)
             self.save_flag = True
             self.empty_flag = False
         if not self.save_flag:
@@ -277,6 +287,7 @@ class Window(QMainWindow, Ui_MainWindow):
             with open(files, 'r', encoding='utf-8') as fle:
                 stat = json.load(fle)
             self.treeF.setStat(stat['frame'])
+            self.progress = stat['progress']
             self.saveDatato = stat['saveDatato']
             self.tree.setStat(stat['tree'])
             for url in stat['urls']:

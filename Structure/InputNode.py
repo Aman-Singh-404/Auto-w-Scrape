@@ -51,7 +51,6 @@ class InputNode(QDialog):
         cover = re.findall(r"=\s*(.*)", string)
         if occur != 0 :
             if cover == [''] or cover[0][0] not in ['"', "'"]:
-                print("pass")
                 return False
             else:
                 cover = cover[0][0]
@@ -66,6 +65,7 @@ class InputNode(QDialog):
     def run(self):
         if self.exec_():
             level = int(self.ui.levelCB.currentText()[6:]) - 1
+            tag_type = self.ui.typeCB.currentText()
             tag = self.ui.tagLE.text()
             value = self.ui.valueTE.toPlainText()
             return [level, tag_type, tag, value]

@@ -44,7 +44,6 @@ class ActionNode(QDialog):
         cover = re.findall(r"=\s*(.*)", string)
         if occur != 0 :
             if cover == [''] or cover[0][0] not in ['"', "'"]:
-                print("pass")
                 return False
             else:
                 cover = cover[0][0]

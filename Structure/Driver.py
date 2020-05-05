@@ -2,29 +2,34 @@ import os
 import re
 import time
 
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from PyQt5.QtWidgets import QMessageBox
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
+from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException, WebDriverException
 from selenium.webdriver.support.ui import Select
 
 
 class Driver:
-    def __init__(self, browser, path, path_list, url_list):
+    def __init__(self, parent, path_list, url_list, index_dict):
         self.driver = None
-        if browser == "Firefox":
-            self.driver = webdriver.Firefox(executable_path=path)
-        else:
-            self.driver = webdriver.Chrome(executable_path=path)
-        self.driver.minimize_window()
-        self.driver.set_window_position(0,0)
-        self.driver.set_window_size(600,600)
+        self.parent = parent
         self.pathList = path_list
         self.urlList = url_list
-        self.dataMatrix = []
         self.state = []
         self.tab = 1
+        self.pause_code = False
+        self.status_code = 0
+        self.file_Data = []
+        self.index_dict = index_dict
     
+    def checkStatus(self):
+        while self.pause_code:
+            self.driver.minimize_window()
+        if self.status_code:
+            raise Exception
+
     def converttoXPATH(self, tag):
         self.driver.minimize_window()
         element = BeautifulSoup(tag, "lxml").find('body').findChild()
@@ -39,6 +44,7 @@ class Driver:
         return xpath[:-6] + ']'
     
     def evaluateAction(self, node, path):
+        self.checkStatus()
         self.driver.minimize_window()
         dataList = {}
         if node.attribute[0] == "Click":
@@ -70,34 +76,31 @@ class Driver:
             time.sleep(int(node.attribute[1]))
         return dataList
 
-    def evaluateData(self, node, prefix):
+    def evaluateData(self, node):
+        self.checkStatus()
         self.driver.minimize_window()
         xpath = self.converttoXPATH(node.attribute[1])
         if not self.wait(xpath):
             return ["ELEMENT_NOT_FOUND_" + node.text()]
-        element = self.driver.find_element_by_xpath(xpath)
+        elements = self.driver.find_elements_by_xpath(xpath)
         if node.attribute[0] == "Text":
-            return [element.text]
-        else:
-            src = ""
-            if elements[i].get_attribute("src") != None:
-                src = elements[i].get_attribute("src")
-            elif elements[i].get_attribute("href") != None:
-                src = elements[i].get_attribute("href")
+            if node.attribute[3]:
+                [elements[node.attribute[3] - 1].text]
             else:
-                tag = elements[i].get_attribute('outerHTML')
-                sre = re.search("(?P<url>https?://[^\s]+)", tag)
-                raw_url = sre.group("url")
-                src = raw_url[:raw_url.find(tag[sre.span()[0]-1])]
-            req = requests.get(src, stream = True)
-            path, base = os.path.split(node.attribute[2])
-            base = prefix + "_" + "_" + base
-            fname = os.path.join(path, base)
-            with open(fname,'wb') as fle:
-                fle.write(req.content)
-            return [fname]
+                return ["\n/@#$/\n".join([element.text for element in elements])]
+        elif node.attribute[0] == "Media":
+            if node.attribute[3]:
+                return [self.saveFile(elements[node.attribute[3] - 1], node.attribute[2], node.text())]
+            else:
+                return ["\n/@#$/\n".join([self.saveFile(element, node.attribute[2], node.text()) for element in elements])]
+        else:
+            if node.attribute[3]:
+                return [self.saveSheet(elements[node.attribute[3] - 1], node.attribute[2], node.text())]
+            else:
+                return ["\n/@#$/\n".join([self.saveSheet(element, node.attribute[2], node.text()) for element in elements])]
     
     def evaluateInput(self, node):
+        self.checkStatus()
         self.driver.minimize_window()
         xpath = self.converttoXPATH(node.attribute[1])
         if not self.wait(xpath):
@@ -121,26 +124,51 @@ class Driver:
                         element.click()
 
     def execute(self):
-        self.driver.minimize_window()
-        for i in range(len(self.urlList)):
-            try:
-                dataList = {}
-                for path in self.pathList:
-                    try:
-                        self.state.append(("Same", self.urlList[i]))
-                        self.driver.get(self.urlList[i])
-                        dataList = self.executePath(path).items()
-                        self.dataMatrix.append([self.urlList[i], dataList])
-                        self.state.pop()
-                    except NoSuchElementException as err:
-                        self.dataMatrix.append([self.urlList[i], err.msg])
-                        continue
-            except WebDriverException:
-                self.dataMatrix.append([self.urlList[i], "URL_NOT_FOUND"])
-        self.driver.close()
-        return self.dataMatrix
+        try:
+            dataMatrix = []
+            self.driver.minimize_window()
+            for i in range(len(self.urlList)):
+                try:
+                    dataList = {}
+                    for path in self.pathList:
+                        try:
+                            self.state.append(("Same", self.urlList[i]))
+                            self.driver.get(self.urlList[i])
+                            dataList = self.executePath(path)
+                            dataMatrix.append([self.urlList[i], dataList])
+                            self.state.pop()
+                        except NoSuchElementException as err:
+                            dataMatrix.append([self.urlList[i], err.msg])
+                            continue
+                except WebDriverException:
+                    dataMatrix.append([self.urlList[i], "URL_NOT_FOUND"])
+                except:
+                    if self.status_code == 3:
+                        self.driver.quit()
+                        for path in self.file_Data:
+                            os.remove(path)
+                        self.parent.reject()
+                        return None
+                    else:
+                        defaulter = [index for index in range(len(dataMatrix)) if dataMatrix[index][0] == self.urlList[i]]
+                        defaulter.reverse()
+                        for index in defaulter:
+                            dataMatrix.pop(index)
+                        if self.status_code == 1:
+                            dataMatrix.append([self.urlList[i], "URL_CANCELED"])
+                        else:
+                            self.parent.index -= 1
+                            break
+                finally:
+                    self.parent.notify()
+            self.driver.quit()
+            self.parent.saveResult(dataMatrix)
+        except:
+            QMessageBox.warning(None, "Alert", "Browser has been stop working.")
+            self.parent.reject()
 
     def executePath(self, path):
+        self.checkStatus()
         self.driver.minimize_window()
         flag = False
         dataList = {}
@@ -160,7 +188,7 @@ class Driver:
                     dataList[label] += value
                 break
             elif node.method == "Data":
-                dataList[node.text()] = self.evaluateData(node, node.text())
+                dataList[node.text()] = self.evaluateData(node)
             else:
                 self.evaluateInput(node)
         if flag:
@@ -173,6 +201,49 @@ class Driver:
                 self.tab -= 1
             self.driver.refresh()
         return dataList
+    
+    def get(self, browser, path):
+        if browser == "Firefox":
+            self.driver = webdriver.Firefox(executable_path=path)
+        else:
+            self.driver = webdriver.Chrome(executable_path=path)
+        self.driver.minimize_window()
+        self.driver.set_window_position(0,0)
+        self.driver.set_window_size(600,600)
+    
+    def saveFile(self, element, path, prefix):
+        src = ""
+        if element.get_attribute("src") != None:
+            src = element.get_attribute("src")
+        elif element.get_attribute("href") != None:
+            src = element.get_attribute("href")
+        else:
+            tag = element.get_attribute('outerHTML')
+            sre = re.search("(?P<url>https?://[^\s]+)", tag)
+            raw_url = sre.group("url")
+            src = raw_url[:raw_url.find(tag[sre.span()[0]-1])]
+        req = requests.get(src, stream = True)
+        path, base = os.path.split(path)
+        base = prefix + "_" + str(self.index_dict[prefix]) + "_" + base
+        self.index_dict[prefix] += 1
+        fname = os.path.join(path, base)
+        with open(fname,'wb') as fle:
+            fle.write(req.content)
+        self.file_Data.append(fname)
+        return fname
+    
+    def saveSheet(self, element, path, prefix):
+        try:
+            path, base = os.path.split(path)
+            base = prefix + "_" + str(self.index_dict[prefix]) + "_" + base
+            self.index_dict[prefix] += 1
+            fname = os.path.join(path, base)
+            df = pd.read_html(element.get_attribute("outerHTML"))[0]
+            df.to_excel(fname, index=False)
+            self.file_Data.append(fname)
+            return fname
+        except:
+            return " NO_TABLE_FOUND_" + prefix
     
     def wait(self, xpath, delay=10):
         self.driver.minimize_window()

@@ -67,7 +67,7 @@ class Tree:
         elif self.Head[node].method == "Input":
             attribute = self.dialogbox.getInput(levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2])
         else:
-            attribute = self.dialogbox.getData(levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2])
+            attribute = self.dialogbox.getData(levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2], lbl.attribute[3])
         if attribute == None:
             return None
         level = self.Head[node].level

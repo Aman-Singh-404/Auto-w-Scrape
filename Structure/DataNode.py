@@ -7,7 +7,7 @@ from Interface.UI_dataNode import Ui_Dialog
 
 
 class DataNode(QDialog):
-    def __init__(self, parent, levels, level, file_type, tag, path):
+    def __init__(self, parent, levels, level, file_type, tag, path, all):
         self.path = ""
 
         QDialog.__init__(self, parent=parent)
@@ -21,6 +21,8 @@ class DataNode(QDialog):
         self.ui.levelCB.setCurrentText(level)
         self.ui.typeCB.setCurrentText(file_type)
         self.ui.typeCB.currentTextChanged.connect(self.changeWindow)
+        self.ui.singleRB.setChecked(all)
+        self.ui.positionSB.setValue(all)
         self.ui.tagLE.setText(tag)
         self.changeWindow(file_type)
         self.setLabel(path)
@@ -33,13 +35,13 @@ class DataNode(QDialog):
         if value == "Text":
             self.ui.browsePB.hide()
             self.ui.browseL.hide()
-            self.ui.buttonBox.move(179, 100)
-            self.setFixedSize(350, 130)
+            self.ui.buttonBox.move(179, 130)
+            self.setFixedSize(350, 160)
         else:
             self.ui.browsePB.show()
             self.ui.browseL.show()
-            self.ui.buttonBox.move(179, 130)
-            self.setFixedSize(350, 160)
+            self.ui.buttonBox.move(179, 165)
+            self.setFixedSize(350, 195)
     
     def checkHTML(self, string):
         string = re.findall(r"^\<(.*?)\>", string.strip())
@@ -55,7 +57,6 @@ class DataNode(QDialog):
         cover = re.findall(r"=\s*(.*)", string)
         if occur != 0 :
             if cover == [''] or cover[0][0] not in ['"', "'"]:
-                print("pass")
                 return False
             else:
                 cover = cover[0][0]
@@ -68,7 +69,11 @@ class DataNode(QDialog):
         return not bool(occur)
     
     def openBrowse(self):
-        files, _ = QFileDialog.getSaveFileName(self, "Select file", self.path)
+        files = ''
+        if self.ui.typeCB.currentText() == "Media":
+            files, _ = QFileDialog.getSaveFileName(self, "Select file", self.path)
+        else:
+            files, _ = QFileDialog.getSaveFileName(self, "Select file", self.path, "Excel(*.xlsx)")
         if files != '':
             self.setLabel(files)
     
@@ -77,7 +82,10 @@ class DataNode(QDialog):
             level = int(self.ui.levelCB.currentText()[6:]) - 1
             file_type = self.ui.typeCB.currentText()
             tag = self.ui.tagLE.text()
-            return [level, file_type, tag, self.path]
+            all = 0
+            if self.ui.singleRB.isChecked():
+                all = self.ui.positionSB.value()
+            return [level, file_type, tag, self.path, all]
         self.show()
 
     def setLabel(self, files):
