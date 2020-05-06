@@ -54,7 +54,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.connectorPB.clicked.connect(self.connectNode)
         self.executePB.clicked.connect(self.executeScript)
         self.urlsTW.itemChanged.connect(self.focusItem)
-        #self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
     def actionNode(self):
         levels = 0
