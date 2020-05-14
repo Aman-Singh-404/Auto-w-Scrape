@@ -4,6 +4,7 @@ from threading import Thread
 
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QDialog, QMessageBox
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
 from sqlalchemy import create_engine
 
 from Interface.UI_progressView import Ui_Dialog
@@ -26,6 +27,7 @@ class ProgressView(QDialog):
         for node in header:
             index_dict[node] = 0
         self.driver = Driver(self, pathlist, self.urllist, index_dict)
+        self.threads = []
         
         self.ui.closePB.clicked.connect(self.reject)
         self.ui.executePB.clicked.connect(self.execute)
@@ -80,11 +82,18 @@ class ProgressView(QDialog):
             reply = QMessageBox.question(self, 'Alert', 'You will lost all scraped data.',QMessageBox.Cancel | QMessageBox.Ok, QMessageBox.Cancel)
             if reply == QMessageBox.Ok:
                 event.accept()
+                for thread in self.threads:
+                    thread.quit()
+                    thread.wait()
             else:
                 event.ignore()
         else:
             event.accept()
     
+    @pyqtSlot()
+    def decrementIndex(self):
+        self.index -= 1
+
     def execute(self):
         browser, path = self.checkBrowser()
         if path != None:
@@ -102,11 +111,15 @@ class ProgressView(QDialog):
             QApplication.processEvents()
 
             self.driver.get(browser, path)
-            thread = Thread(target=self.driver.execute)
+            thread = QThread()
+            self.threads.append(thread)
+            self.driver.moveToThread(thread)
+            thread.started.connect(self.driver.execute)
             thread.start()
         else:
             self.reject()
     
+    @pyqtSlot()
     def notify(self):
         if self.index + 1 == len(self.urllist):
             self.ui.progressPB.setValue(100)
@@ -118,21 +131,17 @@ class ProgressView(QDialog):
     def pauseStatus(self):
         if self.ui.pausePB.text() == "Pause":
             self.ui.pausePB.setText("Resume")
-            QApplication.processEvents()
             self.driver.pause_code = True
         else:
             self.ui.pausePB.setText("Pause")
-            QApplication.processEvents()
             self.driver.pause_code = False
 
     def run(self):
         if self.exec_():
-            del self.driver
             return self.ui.progressPB.value()
-        else:
-            del self.driver
         self.show()
     
+    @pyqtSlot(list)
     def saveResult(self, datamatrix):
         for i in range(len(datamatrix)):
             if type(datamatrix[i][1]) == str:
@@ -140,22 +149,33 @@ class ProgressView(QDialog):
                 for key in self.header:
                     data_dict[key] = [datamatrix[i][1]]
                 datamatrix[i][1] = data_dict
-        
-        df_total = pd.DataFrame(datamatrix[0][1])
-        df_total.insert(0, 'URL', datamatrix[0][0])
+        if len(datamatrix):
+            df_total = pd.DataFrame(datamatrix[0][1])
+            df_total.insert(0, 'URL', datamatrix[0][0])
 
-        for i in range(1, len(datamatrix)):
-            df = pd.DataFrame(datamatrix[i][1])
-            df.insert(0, 'URL', datamatrix[i][0])
-            df_total = df_total.append(df, ignore_index=True)
-        
-        if self.saveto[0]:
-            engine = create_engine(self.saveto[1])
-            conn = engine.connect()
-            df_total.to_sql(self.saveto[2], conn)
-            conn.close()
-            db.dispose()
-        else:
-            df_total.to_excel(self.saveto[1], index=False)
+            for i in range(1, len(datamatrix)):
+                df = pd.DataFrame(datamatrix[i][1])
+                df.insert(0, 'URL', datamatrix[i][0])
+                df_total = df_total.append(df, ignore_index=True)
+            
+            if self.saveto[0]:
+                engine = create_engine(self.saveto[1])
+                conn = engine.connect()
+                df_total.to_sql(self.saveto[2], conn)
+                conn.close()
+                db.dispose()
+            else:
+                df_total.to_excel(self.saveto[1], index=False)
         QMessageBox.about(self, "Information", "Process is completed.")
+        for thread in self.threads:
+            thread.quit()
+            thread.wait()
         self.accept()
+    
+    @pyqtSlot(str)
+    def showError(self, msg):
+        QMessageBox.warning(self, "Alert", msg)
+        for thread in self.threads:
+            thread.quit()
+            thread.wait()
+        self.reject()

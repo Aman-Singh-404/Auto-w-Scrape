@@ -5,16 +5,22 @@ import time
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QMessageBox
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException, WebDriverException
 from selenium.webdriver.support.ui import Select
 
 
-class Driver:
+class Driver(QObject):
+    signalIndex = pyqtSignal()
+    signalProgress = pyqtSignal()
+    signalReject = pyqtSignal(str)
+    signalSave = pyqtSignal(list)
+
     def __init__(self, parent, path_list, url_list, index_dict):
+        super(Driver, self).__init__(parent=None)
         self.driver = None
-        self.parent = parent
         self.pathList = path_list
         self.urlList = url_list
         self.state = []
@@ -23,6 +29,11 @@ class Driver:
         self.status_code = 0
         self.file_Data = []
         self.index_dict = index_dict
+
+        self.signalIndex.connect(parent.decrementIndex)
+        self.signalProgress.connect(parent.notify)
+        self.signalReject.connect(parent.showError)
+        self.signalSave.connect(parent.saveResult)
     
     def checkStatus(self):
         while self.pause_code:
@@ -147,7 +158,7 @@ class Driver:
                         self.driver.quit()
                         for path in self.file_Data:
                             os.remove(path)
-                        self.parent.reject()
+                        self.signalReject.emit("All URLs cancelled.")
                         return None
                     else:
                         defaulter = [index for index in range(len(dataMatrix)) if dataMatrix[index][0] == self.urlList[i]]
@@ -157,15 +168,14 @@ class Driver:
                         if self.status_code == 1:
                             dataMatrix.append([self.urlList[i], "URL_CANCELED"])
                         else:
-                            self.parent.index -= 1
+                            self.signalIndex.emit()
                             break
                 finally:
-                    self.parent.notify()
+                    self.signalProgress.emit()
             self.driver.quit()
-            self.parent.saveResult(dataMatrix)
+            self.signalSave.emit(dataMatrix)
         except:
-            QMessageBox.warning(None, "Alert", "Browser has been stop working.")
-            self.parent.reject()
+            self.signalReject.emit("Browser has been stop working.")
 
     def executePath(self, path):
         self.checkStatus()
