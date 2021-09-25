@@ -47,33 +47,33 @@ class ProgressView(QDialog):
     
     def checkBrowser(self):
         try:
-            path = "Webdriver/Firefox/"
+            path = "Webdriver/Chrome/"
             operating = sys.platform
-            bitsize = platform.architecture()[0][0]
             if operating == "linux":
-                if bitsize == '6':
-                    path += "linux64"
-                else:
-                    path += "linux32"
+                path += "linux"
             elif operating == "win32":
-                if bitsize == '6':
-                    path += "win64.exe"
-                else:
-                    path += "win32.exe"
+                path += "win.exe"
             else:
                 path += "mac"
-            return "Firefox", path
+            return "Chrome", path
         except:
             try:
-                path = "Webdriver/Chrome/"
+                path = "Webdriver/Firefox/"
                 operating = sys.platform
+                bitsize = platform.architecture()[0][0]
                 if operating == "linux":
-                    path += "linux"
+                    if bitsize == '6':
+                        path += "linux64"
+                    else:
+                        path += "linux32"
                 elif operating == "win32":
-                    path += "win.exe"
+                    if bitsize == '6':
+                        path += "win64.exe"
+                    else:
+                        path += "win32.exe"
                 else:
                     path += "mac"
-                return "Chrome", path
+                return "Firefox", path
             except:
                 QMessageBox.warning(self, "Alert", "System doesn't have firfox or chrome browser.")
     
