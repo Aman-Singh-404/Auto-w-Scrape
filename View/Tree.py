@@ -7,7 +7,7 @@ from Structure.Label import Label
 
 
 class Tree:
-    def __init__(self, args):
+    def __init__(self, *args):
         self.frame = args[0]
         self.height = args[1]
         self.width = args[2]
@@ -17,7 +17,7 @@ class Tree:
         self.data = 1
         self.ctrl_flag = True
         self.maxLevel = 0
-        self.dialogbox = args[3]
+        self.dialogbox = None
 
     def adjustTreePosition(self, level, new_ele=True):
         label = 50
