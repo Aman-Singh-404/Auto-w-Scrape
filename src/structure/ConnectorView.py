@@ -40,7 +40,7 @@ class ConnectorView(QDialog):
         label.setAlignment(Qt.AlignCenter)
         label.setObjectName(name)
         label.setText(name)
-        label.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
+        label.setStyleSheet("border: 1px solid #000000 border-radius: 5%")
         self.connector[name] = [label, True]
 
     def delete(self):
@@ -54,9 +54,9 @@ class ConnectorView(QDialog):
         for key, [value, flag] in self.connector.items():
             if QRect(value.pos(), QSize(40, 40)).contains(event.pos()):
                 if flag:
-                    value.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
+                    value.setStyleSheet("background: #565656 color: #EFEFEF border-radius: 5%")
                 else:
-                    value.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
+                    value.setStyleSheet("border: 1px solid #000000 border-radius: 5%")
                     all_True = "Select All"
                 self.connector[key][1] = not flag
             else:
@@ -73,11 +73,11 @@ class ConnectorView(QDialog):
         text = ""
         for key, [value, flag] in self.connector.items():
             if self.ui.selectPB.text() == "Select All":
-                value.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
+                value.setStyleSheet("background: #565656 color: #EFEFEF border-radius: 5%")
                 text = "Deselect All"
                 self.connector[key][1] = False
             else:
-                value.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
+                value.setStyleSheet("border: 1px solid #000000 border-radius: 5%")
                 text = "Select All"
                 self.connector[key][1] = True
         self.ui.selectPB.setText(text)

@@ -1,14 +1,15 @@
 from PyQt5.QtCore import QLine, QPoint
 from PyQt5.QtGui import QCursor, QPainter
 from PyQt5.QtWidgets import QAction, QFrame, QMenu, QMessageBox
+from src.model.Enums import Action_Type, Node_Type
 
-from Structure.Connector import Connector
-from Structure.ConnectorView import ConnectorView
-from Structure.Label import Label
-
+from src.model.Tree import Tree
+from src.structure.ActionNode import ActionNode
+from src.structure.Label import Label
 
 class Frame(QFrame):
     def __init__(self, mwindow):
+        QFrame.__init__(self)
         self.mwindow = mwindow
         self.ctrl_flag = True
         self.state = 0
@@ -17,8 +18,7 @@ class Frame(QFrame):
         self.current_conn = None
         self.lines = {}
         self.move_line = QLine()
-
-        QFrame.__init__(self)
+        self.tree = Tree(self, self.size().width(), self.size().height())
         self.setObjectName("treeF")
         self.setMouseTracking(True)
 
@@ -33,7 +33,20 @@ class Frame(QFrame):
         self.menu.addAction(clearallA)
 
         self.show()
+    
+    def adjustTree(self):
+        for i in range(self.tree.maxLevel + 1):
+            self.tree.adjustTreePosition(i, False)
 
+    def createActionWidget(self):
+        node_attr = ActionNode(self, self.tree.maxLevel + 1, 0, Action_Type.Click, "").run()
+        
+        if node_attr != None:
+            node_attr.update({"frame": self, "tree": self.tree, "node_type": Action_Type.Click})
+            node_attr.update(self.tree.createNode(Node_Type.Action, node_attr["level"]))
+            self.tree.Head[node_attr["name"]] = Label(**node_attr)
+            self.lines[node_attr["name"]] = [None, None]
+    
     def clearAll(self):
         self.mwindow.save_flag = True
         self.removeAll()
@@ -168,7 +181,7 @@ class Frame(QFrame):
 
     def mousePressEvent(self, event):
         if self.ctrl_flag and self.mwindow.connect_flag:
-            self.mwindow.tree.clearSelection()
+            self.tree.clearSelection()
             self.connectorSelection(pos=event.pos())
 
     def paintEvent(self, event):

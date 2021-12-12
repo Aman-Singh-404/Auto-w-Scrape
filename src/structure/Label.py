@@ -26,17 +26,17 @@ class Label(QLabel):
         self.setAlignment(Qt.AlignCenter)
         self.setObjectName(args[2])
         self.setText(args[2])
-        self.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
+        self.setStyleSheet("border: 1px solid #000000 border-radius: 5%")
 
         self.menu = QMenu(self)
         self.menu.setStyleSheet("""
             QMenu::item {
-                background-color: #ffffff;
-                color: #000000;
+                background-color: #ffffff
+                color: #000000
             }
             QMenu::item:selected {
-                background-color: #308cc6;
-                color: #ffffff;
+                background-color: #308cc6
+                color: #ffffff
             }
         """)
 
@@ -51,7 +51,7 @@ class Label(QLabel):
         self.show()
 
     def clear(self):
-        self.setStyleSheet("background: #EFEFEF; color: #000000;border: 1px solid #000000; border-radius: 5%;")
+        self.setStyleSheet("background: #EFEFEF color: #000000border: 1px solid #000000 border-radius: 5%")
         self.border_flag = True
 
     def contextMenuEvent(self, event):
@@ -75,9 +75,9 @@ class Label(QLabel):
             self.parent().indicateLabel(self.objectName(), self.pos())
         self.tree.clearSelection(self.text())
         if self.border_flag or event.button() == Qt.RightButton or not self.conn_flag or not self.ctrl_signal:
-            self.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
+            self.setStyleSheet("background: #565656 color: #EFEFEF border-radius: 5%")
             self.border_flag = False
             self.tree.ctrlOff(True)
         else:
-            self.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
+            self.setStyleSheet("border: 1px solid #000000 border-radius: 5%")
             self.border_flag = True

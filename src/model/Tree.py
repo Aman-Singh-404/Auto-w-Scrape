@@ -3,7 +3,7 @@ import datetime
 from PyQt5.QtCore import QPoint
 from PyQt5.QtWidgets import QMessageBox
 
-from Structure.Label import Label
+from src.model.Enums import Node_Type
 
 
 class Tree:
@@ -12,9 +12,9 @@ class Tree:
         self.height = args[1]
         self.width = args[2]
         self.Head = {}
-        self.action = 1
-        self.input = 1
-        self.data = 1
+        self.action_count = 1
+        self.input_count = 1
+        self.data_count = 1
         self.ctrl_flag = True
         self.maxLevel = 0
         self.dialogbox = None
@@ -108,22 +108,21 @@ class Tree:
             if node != key:
                 value.clear()
 
-    def createNode(self, method, attribute):
-        name = ""
-        if method == "Action":
-            name = "A" + str(self.action)
-            self.action += 1
-        elif method == "Input":
-            name = "I" + str(self.input)
-            self.input += 1
+    def createNode(self, node_type: Node_Type, level: int) -> dict:
+        name: str = None
+        if node_type == Node_Type.Action:
+            name = f"A{self.action_count}"
+            self.action_count += 1
+        elif node_type == Node_Type.Input:
+            name = f"I{self.input_count}"
+            self.input_count += 1
         else:
-            name = "D" + str(self.data)
-            self.data += 1
-        x, y = self.adjustTreePosition(attribute[0])
-        if self.maxLevel < attribute[0]:
+            name = f"D{self.data_count}"
+            self.data_count += 1
+        x, y = self.adjustTreePosition(level)
+        if self.maxLevel < level:
             self.maxLevel += 1
-        self.Head[name] = Label([self.frame, self, name, x, y, method] + attribute)
-        self.frame.lines[name] = [None, None]
+        return {"name": name, "pos_x": x, "pos_y": y}
 
     def ctrlOff(self, flag):
         for key, value in self.Head.items():
@@ -131,7 +130,7 @@ class Tree:
 
     def enableLabel(self, flag):
         for key, value in self.Head.items():
-            value.setStyleSheet("border: 1px solid rgb(0, 0, 0); border-radius: 5%;")
+            value.setStyleSheet("border: 1px solid rgb(0, 0, 0) border-radius: 5%")
             value.conn_flag = flag
 
     def getAllPath(self):
@@ -170,12 +169,12 @@ class Tree:
 
     def getStat(self):
         stat = {}
-        stat['action'] = self.action
-        stat['data'] = self.data
+        stat['action'] = self.action_count
+        stat['data'] = self.data_count
         stat['head'] = {}
         for label, item in self.Head.items():
             stat['head'][label] = item.getStat()
-        stat['input'] = self.input
+        stat['input'] = self.input_count
         stat['maxlevel'] = self.maxLevel
         return stat
 
@@ -237,13 +236,13 @@ class Tree:
         self.frame.mwindow.save_flag = True
 
     def setStat(self, stat):
-        self.action = stat['action']
-        self.data = stat['data']
+        self.action_count = stat['action']
+        self.data_count = stat['data']
         for label, item in stat['head'].items():
             self.Head[label] = Label([self.frame, self] + item['args'])
             self.Head[label].childs = item['childs']
             self.Head[label].parents = item['parents']
             self.Head[label].order = datetime.datetime.strptime(item['order'], '%Y-%m-%d %H:%M:%S.%f')
-        self.input = stat['input']
+        self.input_count = stat['input']
         self.maxLevel = stat['maxlevel']
         self.setRelativeSize()
