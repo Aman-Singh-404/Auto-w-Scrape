@@ -1,6 +1,6 @@
 import json
 import os
-from resource.constants import ACTION_TYPE, EXTENSION, INITIAL_DIRECTORY, INITIAL_HEIGHT, INITIAL_TITLE, INITIAL_WIDTH, TXT_FILE_FILTER
+from constants import INITIAL_DIRECTORY, INITIAL_HEIGHT, INITIAL_TITLE, INITIAL_WIDTH, TXT_FILE_FILTER
 
 from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtGui import QKeyEvent

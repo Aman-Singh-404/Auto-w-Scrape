@@ -1,3 +1,7 @@
+"""
+Contains all configs and intial values
+"""
+
 INITIAL_DIRECTORY: str = "C:\\Users\\singh\\Documents"
 EXTENSION: str = ".txt"
 TXT_FILE_FILTER: str = f"Text Files(*{EXTENSION})"

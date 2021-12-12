@@ -1,9 +1,13 @@
+"""
+Start Apllication
+"""
+
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication
+from utils import excepthook
 
 from src.structure.Window import Window
-from Utils import excepthook
 
 if __name__ == "__main__":
     main_app: QApplication = QApplication(sys.argv)

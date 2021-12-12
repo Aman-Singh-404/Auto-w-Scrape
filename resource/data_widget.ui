@@ -7,30 +7,24 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>180</height>
+    <height>130</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Input Node</string>
+  <property name="minimumSize">
+   <size>
+    <width>350</width>
+    <height>130</height>
+   </size>
   </property>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>5</x>
-     <y>35</y>
-     <width>75</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Type</string>
-   </property>
-  </widget>
+  <property name="maximumSize">
+   <size>
+    <width>350</width>
+    <height>130</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Data Node</string>
+  </property>
   <widget class="QLabel" name="label_1">
    <property name="geometry">
     <rect>
@@ -49,14 +43,22 @@
     <string>Level:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="tagLE">
+  <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>65</y>
-     <width>260</width>
+     <x>5</x>
+     <y>35</y>
+     <width>75</width>
      <height>30</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Type</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -77,10 +79,20 @@
     <string>Tag:</string>
    </property>
   </widget>
+  <widget class="QComboBox" name="levelCB">
+   <property name="geometry">
+    <rect>
+     <x>85</x>
+     <y>5</y>
+     <width>260</width>
+     <height>30</height>
+    </rect>
+   </property>
+  </widget>
   <widget class="QComboBox" name="typeCB">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>85</x>
      <y>35</y>
      <width>260</width>
      <height>30</height>
@@ -88,20 +100,25 @@
    </property>
    <item>
     <property name="text">
-     <string>Text/Combo Box</string>
+     <string>Text</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Radio Button/Check Box</string>
+     <string>Media</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Table</string>
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="levelCB">
+  <widget class="QLineEdit" name="valueLE">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>5</y>
+     <x>85</x>
+     <y>65</y>
      <width>260</width>
      <height>30</height>
     </rect>
@@ -111,41 +128,13 @@
    <property name="geometry">
     <rect>
      <x>179</x>
-     <y>150</y>
+     <y>100</y>
      <width>166</width>
      <height>25</height>
     </rect>
    </property>
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>5</x>
-     <y>95</y>
-     <width>75</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>14</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Value:</string>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="valueTE">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>95</y>
-     <width>260</width>
-     <height>50</height>
-    </rect>
    </property>
   </widget>
  </widget>

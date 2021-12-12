@@ -1,3 +1,4 @@
 Webdriver/
 __pycache__/
 test.py
+.pylintrc

@@ -7,6 +7,11 @@ from PyQt5.QtWidgets import QAction, QLabel, QMenu
 
 class Label(QLabel):
     def __init__(self, args):
+
+        # {'level': 0, 'action_type': <Action_Type.Click: 1>, 'value': '<a>', 
+        # 'frame': <src.structure.Frame.Frame object at 0x000001B79B4BD900>, 
+        # 'tree': <src.model.Tree.Tree object at 0x000001B79B530580>, 
+        # 'node_type': <Action_Type.Click: 1>, 'name': 'A1', 'pos_x': 10, 'pos_y': 10}
         self.tree = args[1]
         self.border_flag = True
         self.conn_flag = True

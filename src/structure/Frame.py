@@ -4,12 +4,12 @@ from PyQt5.QtWidgets import QAction, QFrame, QMenu, QMessageBox
 from src.model.Enums import Action_Type, Node_Type
 
 from src.model.Tree import Tree
-from src.structure.ActionNode import ActionNode
+from src.structure.actionwidget import ActionWidget
 from src.structure.Label import Label
 
 class Frame(QFrame):
     def __init__(self, mwindow):
-        QFrame.__init__(self)
+        QFrame.__init__(self, mwindow)
         self.mwindow = mwindow
         self.ctrl_flag = True
         self.state = 0
@@ -39,11 +39,12 @@ class Frame(QFrame):
             self.tree.adjustTreePosition(i, False)
 
     def createActionWidget(self):
-        node_attr = ActionNode(self, self.tree.maxLevel + 1, 0, Action_Type.Click, "").run()
+        node_attr = ActionWidget(self, self.tree.maxLevel + 1, 0, Action_Type.Click, "").run()
         
         if node_attr != None:
             node_attr.update({"frame": self, "tree": self.tree, "node_type": Action_Type.Click})
             node_attr.update(self.tree.createNode(Node_Type.Action, node_attr["level"]))
+            print(node_attr)
             self.tree.Head[node_attr["name"]] = Label(**node_attr)
             self.lines[node_attr["name"]] = [None, None]
     
