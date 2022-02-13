@@ -18,9 +18,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         # Property variables
-        self.urls: list = []  # store all urls
+        self.urls: list = []  # Store all urls
         self.location = None  # Store file location
-        self.title: str = "Untitled"
+        self.title: str = "Untitled" # Store file title
         # Flag variables
         self.save_flag: bool = False  # True indicates file is unsaved
         self.empty_flag: bool = True  # True indicates frame is empty
@@ -30,7 +30,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setWindowTitle(self.title)
         self.frame: Frame = Frame(self)
         self.frame.setFixedSize(INITIAL_WIDTH, INITIAL_HEIGHT)
-        # self.treeSA.setWidget(self.frame)
+        self.treeSA.setWidget(self.frame)
         self.intialheight: int = self.size().height()
         self.intialwidth: int = self.size().width()
 
@@ -39,9 +39,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.actionOpen.triggered.connect(self.openFile)
         self.actionSave.triggered.connect(self.saveFile)
         self.actionExit.triggered.connect(self.close)
-        self.actionsaveExcel.triggered.connect(self.savetoExcel)
-        self.addUrlPB.clicked.connect(self.addUrl)
-        self.removeUrlPB.clicked.connect(self.removeUrl)
+        # self.actionsaveExcel.triggered.connect(self.savetoExcel)
+        # self.addUrlPB.clicked.connect(self.addUrl)
+        # self.removeUrlPB.clicked.connect(self.removeUrl)
         self.action_nodePB.clicked.connect(self.actionNode)
         self.input_nodePB.clicked.connect(self.inputNode)
         self.data_nodePB.clicked.connect(self.dataNode)
@@ -54,9 +54,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.performUnsaved()
 
     def performUnsaved(self):
-        self.setWindowTitle("*" + self.windowTitle())
-        self.save_flag = True
-        self.empty_flag = False
+        if not self.save_flag:
+            self.setWindowTitle("*" + self.windowTitle())
+            self.save_flag = True
+            self.empty_flag = False
 
     def addUrl(self, url=""):
         index = self.urlsTW.rowCount() + 1

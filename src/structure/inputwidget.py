@@ -4,7 +4,7 @@ User Inteface for inputting information for Input Widget
 
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 from src.interface.ui_input_widget import Ui_Dialog
-from src.model.Enums import Input_Type
+from src.model.enums import InputType
 from utils import validHTMLTag
 
 
@@ -13,8 +13,15 @@ class InputWidget(QDialog):
     Data Widget Interface
     """
 
-    def __init__(self, parent: QWidget, level_count: int, current_level: int,
-                 node_type: Input_Type, value: str, input_string: str):
+    def __init__(
+        self,
+        parent: QWidget,
+        level_count: int,
+        current_level: int,
+        node_type: InputType,
+        value: str,
+        input_string: str,
+    ):
         # Setup UI design
         QDialog.__init__(self, parent)
         self.interface = Ui_Dialog()
@@ -38,10 +45,10 @@ class InputWidget(QDialog):
         self.interface.buttonBox.rejected.connect(self.reject)
 
     def changeWindow(self, value) -> None:
-        '''
+        """
         Change window layout on change of input type
-        '''
-        if value == Input_Type.Alphanumeric.value:
+        """
+        if value == InputType.TEXT.value:
             self.interface.label_4.show()
             self.interface.inputTE.show()
             self.interface.buttonBox.move(179, 150)
@@ -53,14 +60,14 @@ class InputWidget(QDialog):
             self.setFixedSize(350, 130)
 
     def run(self) -> dict:
-        '''
+        """
         Run the Input Widget interface
-        '''
+        """
         if self.exec_():
             #  If executed and validated successfully, then return user input
             node_attr: dict = {}
             node_attr["level"] = self.interface.levelCB.currentIndex()
-            node_attr["input_type"] = Input_Type[self.interface.typeCB.currentText()]
+            node_attr["input_type"] = InputType[self.interface.typeCB.currentText()]
             node_attr["value"] = self.interface.valueLE.text()
             node_attr["input"] = self.interface.inputTE.text()
             return node_attr
@@ -68,20 +75,20 @@ class InputWidget(QDialog):
         return {}
 
     def verify(self) -> None:
-        '''
+        """
         Validates the user input
-        '''
+        """
         input_type: str = self.interface.typeCB.currentText()
         value: str = self.interface.valueLE.text()
         input_string: str = self.interface.inputTE.toPlainText()
 
-        if not Input_Type.hasValue(input_type):
+        if not InputType.hasValue(input_type):
             # If user input is not an data type, then show error message
             QMessageBox.warning(self, "Alert", "Invalid Input option.")
         elif not validHTMLTag(value):
             # If invalid HTML tag, show error
             QMessageBox.warning(self, "Alert", "HTML tag is invalid.")
-        elif Input_Type.Alphanumeric.value == value and input_string == "":
+        elif InputType.TEXT.value == value and input_string == "":
             # If selected option is alpha-numeric and input value is empty, show error
             QMessageBox.warning(self, "Alert", "Input value is empty.")
         else:

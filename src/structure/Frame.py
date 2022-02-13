@@ -1,16 +1,19 @@
 from PyQt5.QtCore import QLine, QPoint
 from PyQt5.QtGui import QCursor, QPainter
 from PyQt5.QtWidgets import QAction, QFrame, QMenu, QMessageBox
-from src.model.Enums import Action_Type, Node_Type
+from src.model.enums import ActionType, InputType, NodeType
 
 from src.model.Tree import Tree
+from src.model.node import Node
 from src.structure.actionwidget import ActionWidget
-from src.structure.Label import Label
+from src.structure.inputwidget import InputWidget
+from src.structure.label import Label
+
 
 class Frame(QFrame):
-    def __init__(self, mwindow):
-        QFrame.__init__(self, mwindow)
-        self.mwindow = mwindow
+    def __init__(self, parent):
+        # Setup UI design
+        QFrame.__init__(self, parent)
         self.ctrl_flag = True
         self.state = 0
         self.label = ""
@@ -19,39 +22,66 @@ class Frame(QFrame):
         self.lines = {}
         self.move_line = QLine()
         self.tree = Tree(self, self.size().width(), self.size().height())
-        self.setObjectName("treeF")
         self.setMouseTracking(True)
 
         self.menu = QMenu(self)
 
-        clearA = QAction('Clear Connectors', self)
+        clearA = QAction("Clear Connectors", self)
         clearA.triggered.connect(self.removeAll)
         self.menu.addAction(clearA)
 
-        clearallA = QAction('Clear Frame', self)
+        clearallA = QAction("Clear Frame", self)
         clearallA.triggered.connect(self.clearAll)
         self.menu.addAction(clearallA)
 
         self.show()
-    
+
     def adjustTree(self):
         for i in range(self.tree.maxLevel + 1):
             self.tree.adjustTreePosition(i, False)
 
     def createActionWidget(self):
-        node_attr = ActionWidget(self, self.tree.maxLevel + 1, 0, Action_Type.Click, "").run()
-        
-        if node_attr != None:
-            node_attr.update({"frame": self, "tree": self.tree, "node_type": Action_Type.Click})
-            node_attr.update(self.tree.createNode(Node_Type.Action, node_attr["level"]))
-            print(node_attr)
-            self.tree.Head[node_attr["name"]] = Label(**node_attr)
+        node_attr: dict = ActionWidget(
+            self, self.tree.maxLevel + 1, 0, ActionType.CLICK, ""
+        ).run()
+
+        if node_attr != {}:
+            node_attr.update(self.tree.createNode(NodeType.ACTION, node_attr["level"]))
+            node: Node = Node(
+                node_attr["name"],
+                node_attr["value"],
+                NodeType.ACTION,
+                node_attr["level"],
+                node_attr["action_type"],
+            )
+            self.tree.Head[node_attr["name"]] = Label(
+                self, node, node_attr["pos_x"], node_attr["pos_y"]
+            )
             self.lines[node_attr["name"]] = [None, None]
-    
+
+    def createInputWidget(self):
+        node_attr: dict = InputWidget(
+            self, self.tree.maxLevel + 1, 0, InputType.TEXT, "", ""
+        ).run()
+
+        if node_attr != {}:
+            node_attr.update(self.tree.createNode(NodeType.INPUT, node_attr["level"]))
+            node: Node = Node(
+                node_attr["name"],
+                node_attr["value"],
+                NodeType.ACTION,
+                node_attr["level"],
+                node_attr["input_type"],
+            )
+            self.tree.Head[node_attr["name"]] = Label(
+                self, node, node_attr["pos_x"], node_attr["pos_y"]
+            )
+            self.lines[node_attr["name"]] = [None, None]
+
     def clearAll(self):
-        self.mwindow.save_flag = True
+        self.parent().save_flag = True
         self.removeAll()
-        self.mwindow.tree.removeAllNode()
+        self.parent().tree.removeAllNode()
 
     def connecterdown(self):
         if self.state == 1:
@@ -90,27 +120,41 @@ class Frame(QFrame):
             self.current_conn = None
             return None, None, None
         for item in self.lines[select][state].connectedEnds:
-            self.lines[item][int(not state)].selected = self.lines[select][state].selected
+            self.lines[item][int(not state)].selected = self.lines[select][
+                state
+            ].selected
         self.update()
         return select, state, self.lines[select][state].connectedEnds
 
     def contextMenuEvent(self, event):
-        if self.mwindow.connect_flag:
+        if self.parent().connect_flag:
             self.menu.popup(QCursor.pos())
 
     def delete(self):
         if self.current_conn != None:
-            if self.lines[self.current_conn][0] != None and not self.lines[self.current_conn][0].selected:
-                self.deleteConnector(self.current_conn, [self.lines[self.current_conn][0].connectedEnds.copy(), []])
-            elif self.lines[self.current_conn][1] != None and not self.lines[self.current_conn][1].selected:
-                self.deleteConnector(self.current_conn, [[], self.lines[self.current_conn][1].connectedEnds.copy()])
+            if (
+                self.lines[self.current_conn][0] != None
+                and not self.lines[self.current_conn][0].selected
+            ):
+                self.deleteConnector(
+                    self.current_conn,
+                    [self.lines[self.current_conn][0].connectedEnds.copy(), []],
+                )
+            elif (
+                self.lines[self.current_conn][1] != None
+                and not self.lines[self.current_conn][1].selected
+            ):
+                self.deleteConnector(
+                    self.current_conn,
+                    [[], self.lines[self.current_conn][1].connectedEnds.copy()],
+                )
             self.current_conn = None
 
     def deleteConnector(self, label, faulter):
         for item in faulter[0]:
             self.lines[label][0].connectedEnds.remove(item)
             self.lines[item][1].connectedEnds.remove(label)
-            self.mwindow.tree.removeRelations(item, label)
+            self.parent().tree.removeRelations(item, label)
             if self.lines[item][1].connectedEnds == []:
                 self.lines[item][1] = None
         if faulter[0] != [] and self.lines[label][0].connectedEnds == []:
@@ -118,13 +162,13 @@ class Frame(QFrame):
         for item in faulter[1]:
             self.lines[label][1].connectedEnds.remove(item)
             self.lines[item][0].connectedEnds.remove(label)
-            self.mwindow.tree.removeRelations(label, item)
+            self.parent().tree.removeRelations(label, item)
             if self.lines[item][0].connectedEnds == []:
                 self.lines[item][0] = None
         if faulter[1] != [] and self.lines[label][1].connectedEnds == []:
             self.lines[label][1] = None
         self.connectorSelection(QPoint(0, 0))
-        self.mwindow.save_flag = True
+        self.parent().save_flag = True
 
     def getStat(self):
         stat = {}
@@ -149,19 +193,21 @@ class Frame(QFrame):
             if label not in self.lines[self.label][1].connectedEnds:
                 self.lines[self.label][1].connectedEnds.append(label)
                 self.lines[label][0].connectedEnds.append(self.label)
-                self.mwindow.tree.setRelations(self.label, label)
-                self.mwindow.save_flag = True
+                self.parent().tree.setRelations(self.label, label)
+                self.parent().save_flag = True
             self.update()
             self.state = (self.state + 1) % 3
             self.label = ""
-            self.mwindow.tree.enableLabel(True)
-            self.mwindow.connect_flag = True
+            self.parent().tree.enableLabel(True)
+            self.parent().connect_flag = True
         else:
             self.state = (self.state - 1) % 3
-            QMessageBox.warning(self, 'Alert', "Same or top level connectors are restricted.")
+            QMessageBox.warning(
+                self, "Alert", "Same or top level connectors are restricted."
+            )
 
     def mouseDoubleClickEvent(self, event):
-        if self.ctrl_flag and self.mwindow.connect_flag:
+        if self.ctrl_flag and self.parent().connect_flag:
             label, state, item_list = self.connectorSelection(pos=event.pos())
             if label == None:
                 return None
@@ -181,7 +227,7 @@ class Frame(QFrame):
             self.lbl_pos = event.pos()
 
     def mousePressEvent(self, event):
-        if self.ctrl_flag and self.mwindow.connect_flag:
+        if self.ctrl_flag and self.parent().connect_flag:
             self.tree.clearSelection()
             self.connectorSelection(pos=event.pos())
 
@@ -201,18 +247,22 @@ class Frame(QFrame):
         for key, _ in self.lines.items():
             self.lines[key] = [None, None]
         self.update()
-        self.mwindow.tree.removeAllRelations()
-        self.mwindow.save_flag = True
+        self.parent().tree.removeAllRelations()
+        self.parent().save_flag = True
 
     def setStat(self, stat):
         for label, conn in stat.items():
             self.lines[label] = [None, None]
             if conn[0] != None:
-                self.lines[label][0] = Connector(conn[0]['inherit'], QPoint(conn[0]['pos'][0], conn[0]['pos'][1]))
-                self.lines[label][0].connectedEnds = conn[0]['connectedEnds']
+                self.lines[label][0] = Connector(
+                    conn[0]["inherit"], QPoint(conn[0]["pos"][0], conn[0]["pos"][1])
+                )
+                self.lines[label][0].connectedEnds = conn[0]["connectedEnds"]
             if conn[1] != None:
-                self.lines[label][1] = Connector(conn[1]['inherit'], QPoint(conn[1]['pos'][0], conn[1]['pos'][1]))
-                self.lines[label][1].connectedEnds = conn[1]['connectedEnds']
+                self.lines[label][1] = Connector(
+                    conn[1]["inherit"], QPoint(conn[1]["pos"][0], conn[1]["pos"][1])
+                )
+                self.lines[label][1].connectedEnds = conn[1]["connectedEnds"]
         self.update()
 
     def updateconnector(self, update_list):

@@ -1,4 +1,8 @@
-from Structure import ActionNode, DataNode, InputNode
+"""
+User Inteface for inputting information for Action Widget
+"""
+
+from structure import ActionNode, DataNode, InputNode
 
 
 class DialogBox:
