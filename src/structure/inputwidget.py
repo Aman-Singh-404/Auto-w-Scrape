@@ -67,9 +67,9 @@ class InputWidget(QDialog):
             #  If executed and validated successfully, then return user input
             node_attr: dict = {}
             node_attr["level"] = self.interface.levelCB.currentIndex()
-            node_attr["input_type"] = InputType[self.interface.typeCB.currentText()]
+            node_attr["input_type"] = InputType(self.interface.typeCB.currentText())
             node_attr["value"] = self.interface.valueLE.text()
-            node_attr["input"] = self.interface.inputTE.text()
+            node_attr["input"] = self.interface.inputTE.toPlainText()
             return node_attr
         self.show()
         return {}
@@ -88,7 +88,7 @@ class InputWidget(QDialog):
         elif not validHTMLTag(value):
             # If invalid HTML tag, show error
             QMessageBox.warning(self, "Alert", "HTML tag is invalid.")
-        elif InputType.TEXT.value == value and input_string == "":
+        elif InputType.TEXT.value == input_type and input_string == "":
             # If selected option is alpha-numeric and input value is empty, show error
             QMessageBox.warning(self, "Alert", "Input value is empty.")
         else:

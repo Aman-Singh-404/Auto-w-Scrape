@@ -1,19 +1,20 @@
 from PyQt5.QtCore import QLine, QPoint
 from PyQt5.QtGui import QCursor, QPainter
 from PyQt5.QtWidgets import QAction, QFrame, QMenu, QMessageBox
-from src.model.enums import ActionType, InputType, NodeType
-
 from src.model.Tree import Tree
+from src.model.enums import ActionType, DataType, InputType, NodeType
+
 from src.model.node import Node
 from src.structure.actionwidget import ActionWidget
+from src.structure.datawidget import DataWidget
 from src.structure.inputwidget import InputWidget
 from src.structure.label import Label
 
 
-class Frame(QFrame):
+class Frame(QFrame, Tree):
     def __init__(self, parent):
         # Setup UI design
-        QFrame.__init__(self, parent)
+        QFrame.__init__(self, parent=parent)
         self.ctrl_flag = True
         self.state = 0
         self.label = ""
@@ -21,7 +22,6 @@ class Frame(QFrame):
         self.current_conn = None
         self.lines = {}
         self.move_line = QLine()
-        self.tree = Tree(self, self.size().width(), self.size().height())
         self.setMouseTracking(True)
 
         self.menu = QMenu(self)
@@ -37,16 +37,21 @@ class Frame(QFrame):
         self.show()
 
     def adjustTree(self):
-        for i in range(self.tree.maxLevel + 1):
-            self.tree.adjustTreePosition(i, False)
+        for i in range(self.maxLevel + 1):
+            self.adjustTreePosition(i, False)
 
     def createActionWidget(self):
+        """
+        Create Action Label
+        """
+        # Run ActionWidget to get node attribute
         node_attr: dict = ActionWidget(
-            self, self.tree.maxLevel + 1, 0, ActionType.CLICK, ""
+            self, self.maxLevel + 1, 0, ActionType.CLICK, ""
         ).run()
 
         if node_attr != {}:
-            node_attr.update(self.tree.createNode(NodeType.ACTION, node_attr["level"]))
+            # If node attributes provided correctly, then create label
+            node_attr.update(self.createNode(NodeType.ACTION, node_attr["level"]))
             node: Node = Node(
                 node_attr["name"],
                 node_attr["value"],
@@ -54,29 +59,118 @@ class Frame(QFrame):
                 node_attr["level"],
                 node_attr["action_type"],
             )
-            self.tree.Head[node_attr["name"]] = Label(
+
+            # Update Frame by adding Label
+            self.Head[node_attr["name"]] = Label(
                 self, node, node_attr["pos_x"], node_attr["pos_y"]
             )
             self.lines[node_attr["name"]] = [None, None]
 
     def createInputWidget(self):
+        """
+        Create Input Label
+        """
+        # Run InputWidget to get node attribute
         node_attr: dict = InputWidget(
-            self, self.tree.maxLevel + 1, 0, InputType.TEXT, "", ""
+            self, self.maxLevel + 1, 0, InputType.TEXT, "", ""
         ).run()
 
         if node_attr != {}:
-            node_attr.update(self.tree.createNode(NodeType.INPUT, node_attr["level"]))
+            # If node attributes provided correctly, then create label
+            node_attr.update(self.createNode(NodeType.INPUT, node_attr["level"]))
             node: Node = Node(
                 node_attr["name"],
                 node_attr["value"],
-                NodeType.ACTION,
+                NodeType.INPUT,
                 node_attr["level"],
                 node_attr["input_type"],
             )
-            self.tree.Head[node_attr["name"]] = Label(
+            node.setAttribute("input", node_attr["input"])
+
+            # Update Frame by adding Label
+            self.Head[node_attr["name"]] = Label(
                 self, node, node_attr["pos_x"], node_attr["pos_y"]
             )
             self.lines[node_attr["name"]] = [None, None]
+
+    def createDataWidget(self):
+        """
+        Create Data Label
+        """
+        # Run DataWidget to get node attribute
+        node_attr: dict = DataWidget(
+            self, self.maxLevel + 1, 0, DataType.TEXT, ""
+        ).run()
+
+        if node_attr != {}:
+            # If node attributes provided correctly, then create label
+            node_attr.update(self.createNode(NodeType.INPUT, node_attr["level"]))
+            node: Node = Node(
+                node_attr["name"],
+                node_attr["value"],
+                NodeType.DATA,
+                node_attr["level"],
+                node_attr["input_type"],
+            )
+
+            # Update Frame by adding Label
+            self.Head[node_attr["name"]] = Label(
+                self, node, node_attr["pos_x"], node_attr["pos_y"]
+            )
+            self.lines[node_attr["name"]] = [None, None]
+
+    def updateNode(self, current_label: Label):
+        """
+        Used to change attrbutes of label
+        """
+        node: Node = current_label.node
+        node_attr: dict = {}
+
+        # To get updated attributes for node
+        if node.node_type == NodeType.ACTION:
+            # If node is action type
+            node_attr = ActionWidget(
+                self, self.maxLevel + 1, node.level, node.inner_type, node.value
+            ).run()
+        elif node.node_type == NodeType.INPUT:
+            # If node is input type
+            node_attr = InputWidget(
+                self,
+                self.maxLevel + 1,
+                node.level,
+                node.inner_type,
+                node.value,
+                node.getAttribute("input"),
+            ).run()
+        else:
+            # If node is data type
+            node_attr = DataWidget(
+                self, self.maxLevel + 1, node.level, node.inner_type, node.value
+            ).run()
+
+        # Check whether node attributes has not been updated,
+        # Or
+        # Connection is violated in parent or child relation
+        # Then end
+        if node_attr == {} or (
+            node.level != node_attr["level"]
+            and not self.checkConnection(node, node_attr["level"])
+        ):
+            return None
+
+        current_label.node.name = node_attr["name"]
+        current_label.node.value = node_attr["value"]
+        current_label.node.node_type = node_attr["node_type"]
+        current_label.node.level = node_attr["level"]
+        current_label.node.inner_type = node_attr["inner_type"]
+        self.updateTree()
+
+        if node.node_type == NodeType.INPUT:
+            # If node is input type, update input attribute
+            current_label.node.setAttribute("input", node_attr["input"])
+        elif node.node_type == NodeType.DATA:
+            # If node is data type, update
+            pass
 
     def clearAll(self):
         self.parent().save_flag = True
@@ -228,7 +322,7 @@ class Frame(QFrame):
 
     def mousePressEvent(self, event):
         if self.ctrl_flag and self.parent().connect_flag:
-            self.tree.clearSelection()
+            self.clearSelection()
             self.connectorSelection(pos=event.pos())
 
     def paintEvent(self, event):

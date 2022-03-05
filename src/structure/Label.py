@@ -28,7 +28,7 @@ class Label(QLabel):
         # Property variables
         self.parents: list = []  # Store all parents of node
         self.childs: list = []  # Store all children of node
-        self.node: Node = node
+        self.node: Node = node  # Store node attrbutes
         self.border_flag = True
         self.conn_flag = True
         self.ctrl_signal = True
@@ -61,7 +61,7 @@ class Label(QLabel):
         )
         self.show()
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Clear style of label and set defaults
         """
@@ -70,14 +70,14 @@ class Label(QLabel):
         )
         self.border_flag = True
 
-    def contextMenuEvent(self, event):
+    def contextMenuEvent(self, event) -> None:
         """
         Control menu popup
         """
         if self.conn_flag:
             self.menu.popup(QCursor.pos())
 
-    def store(self):
+    def store(self) -> dict:
         """
         Load label
         """
@@ -100,14 +100,14 @@ class Label(QLabel):
 
         return label_attr
 
-    def mouseDoubleClickEvent(self, event):
+    def mouseDoubleClickEvent(self, event) -> None:
         """
         Control label double click
         """
         if self.conn_flag:
-            self.parent().tree.changeNode(self.text())
+            self.parent().updateNode(self.text())
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """
         Control label click
         """

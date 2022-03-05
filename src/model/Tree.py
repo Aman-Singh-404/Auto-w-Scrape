@@ -4,22 +4,22 @@ from PyQt5.QtCore import QPoint
 from PyQt5.QtWidgets import QMessageBox
 
 from src.model.enums import ActionType, NodeType
+from src.structure.Frame import Frame
 from src.structure.label import Label
 from src.structure.actionwidget import ActionWidget
 
 
 class Tree:
-    def __init__(self, *args):
-        self.frame = args[0]
-        self.height = args[1]
-        self.width = args[2]
+    def __init__(self, parent):
+        Frame.__init__(self, parent=parent)
+        self.height = self.size().height()
+        self.width = self.size().width()
         self.Head = {}
         self.action_count = 1
         self.input_count = 1
         self.data_count = 1
         self.ctrl_flag = True
         self.maxLevel = 0
-        self.dialogbox = None
 
     def adjustTreePosition(self, level, new_ele=True):
         label = 50
@@ -52,53 +52,20 @@ class Tree:
         return x, y
 
     def changeLevels(self, level):
-        for key, value in self.Head.items():
+        for _, value in self.Head.items():
             if value.node.level > level:
                 value.level -= 1
         if self.maxLevel > 1:
             self.maxLevel -= 1
 
-    def changeNode(self, node):
-        levels = 0
-        if self.getLevelItems(self.maxLevel) == []:
-            levels = self.maxLevel + 1
-        else:
-            levels = self.maxLevel + 2
-        current_label: Label = self.Head[node]
-        if self.Head[node].node.node_type == NodeType.ACTION:
-            node_attr: dict = ActionWidget(
-                self.frame,
-                self.maxLevel + 1,
-                current_label.node.level,
-                current_label.node.inner_type,
-                current_label.node.value,
-            ).run()
-        elif self.Head[node].node.node_type == NodeType.INPUT:
-            attribute = self.dialogbox.getInput(
-                levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2]
-            )
-        else:
-            attribute = self.dialogbox.getData(
-                levels,
-                lbl.level,
-                lbl.attribute[0],
-                lbl.attribute[1],
-                lbl.attribute[2],
-                lbl.attribute[3],
-            )
-        if node_attr == {} or not self.checkConnector(node, node_attr["level"]):
-            return None
-
-        level = self.Head[node].node.level
-        self.Head[node].node.level = node_attr["level"]
-        # self.Head[node].attribute = attribute[1:]
-        if level != node_attr["level"] and self.getLevelItems(level) == []:
-            self.changeLevels(level)
-        if self.maxLevel < node_attr["level"]:
+    def updateTree(self, current_level: int, new_level: int) -> None:
+        if current_level != new_level and self.getLevelItems(current_level) == []:
+            self.changeLevels(current_level)
+        if self.maxLevel < new_level:
             self.maxLevel += 1
         self.setRelativeSize()
 
-    def checkConnector(self, label, level):
+    def checkConnection(self, label, level):
         faulter = [[], []]
         for item in self.Head[label].parents:
             if self.Head[item].level >= level:
@@ -272,7 +239,6 @@ class Tree:
             self.height = treeSA.size().height()
         for i in range(self.maxLevel + 1):
             self.adjustTreePosition(i, False)
-        self.frame.parent().save_flag = True
 
     def setStat(self, stat):
         self.action_count = stat["action"]

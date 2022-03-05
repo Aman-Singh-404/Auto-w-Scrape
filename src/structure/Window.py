@@ -1,11 +1,16 @@
 import json
 import os
-from constants import INITIAL_DIRECTORY, INITIAL_HEIGHT, INITIAL_TITLE, INITIAL_WIDTH, TXT_FILE_FILTER
+from constants import (
+    INITIAL_DIRECTORY,
+    INITIAL_HEIGHT,
+    INITIAL_TITLE,
+    INITIAL_WIDTH,
+    TXT_FILE_FILTER,
+)
 
 from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import (QFileDialog, QMainWindow, QMessageBox,
-                             QTableWidgetItem)
+from PyQt5.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem
 from src.interface.UI_automScra import Ui_MainWindow
 from src.model.Tree import Tree
 from src.structure.Frame import Frame
@@ -20,7 +25,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # Property variables
         self.urls: list = []  # Store all urls
         self.location = None  # Store file location
-        self.title: str = "Untitled" # Store file title
+        self.title: str = "Untitled"  # Store file title
         # Flag variables
         self.save_flag: bool = False  # True indicates file is unsaved
         self.empty_flag: bool = True  # True indicates frame is empty
@@ -65,16 +70,17 @@ class Window(QMainWindow, Ui_MainWindow):
         self.urlsTW.setItem(index - 1, 0, QTableWidgetItem(url))
 
     def closeEvent(self, event):
-        '''
+        """
         Exit the application
-        '''
+        """
         if self.save_flag:
             # If Window is unsaved, then ask for saving the information.
             reply = QMessageBox.question(
                 self,
                 "AutomScra",
                 f"Do you want to save changes to {self.title}?",
-                QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save, QMessageBox.Cancel
+                QMessageBox.Discard | QMessageBox.Cancel | QMessageBox.Save,
+                QMessageBox.Cancel,
             )
             if reply == QMessageBox.Save:
                 self.saveFile()
@@ -84,7 +90,8 @@ class Window(QMainWindow, Ui_MainWindow):
             else:
                 event.ignore()
                 self.keyReleaseEvent(
-                    QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0))
+                    QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0)
+                )
         else:
             event.accept()
 
@@ -104,14 +111,24 @@ class Window(QMainWindow, Ui_MainWindow):
     def executeScript(self):
         if self.save_flag:
             reply = QMessageBox.question(
-                self, "Alert", "File is not saved.", QMessageBox.Cancel | QMessageBox.Save, QMessageBox.Cancel)
+                self,
+                "Alert",
+                "File is not saved.",
+                QMessageBox.Cancel | QMessageBox.Save,
+                QMessageBox.Cancel,
+            )
             if reply == QMessageBox.Save:
                 self.saveFile()
             else:
                 return None
         if self.progress == 100:
             reply = QMessageBox.question(
-                self, "Alert", "Do you want to  execute again.", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
+                self,
+                "Alert",
+                "Do you want to  execute again.",
+                QMessageBox.No | QMessageBox.Yes,
+                QMessageBox.No,
+            )
             if reply == QMessageBox.Yes:
                 self.progress = 0
                 self.save_flag = True
@@ -128,13 +145,15 @@ class Window(QMainWindow, Ui_MainWindow):
             else:
                 url_list.append("http://" + self.urlsTW.item(i, 0).text())
         if url_list == []:
-            QMessageBox.warning(self, 'Alert', "URL bin is empty.")
+            QMessageBox.warning(self, "Alert", "URL bin is empty.")
         elif self.saveDatato == None:
             QMessageBox.warning(
-                self, "Alert", "Location and mode for data saving is not selected")
+                self, "Alert", "Location and mode for data saving is not selected"
+            )
         elif path_list != []:
             progressview = ProgressView(
-                self, path_list, url_list, self.saveDatato, header, self.progress)
+                self, path_list, url_list, self.saveDatato, header, self.progress
+            )
             progress = progressview.run()
             if progress != None and progress != self.progress:
                 self.progress = progress
@@ -142,13 +161,13 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def getStat(self):
         stat = {}
-        stat['frame'] = self.frame.getStat()
-        stat['progress'] = self.progress
-        stat['saveDatato'] = self.saveDatato
+        stat["frame"] = self.frame.getStat()
+        stat["progress"] = self.progress
+        stat["saveDatato"] = self.saveDatato
         # stat['tree'] = self.tree.getStat()
-        stat['urls'] = []
+        stat["urls"] = []
         for i in range(self.urlsTW.rowCount()):
-            stat['urls'].append(self.urlsTW.item(i, 0).text())
+            stat["urls"].append(self.urlsTW.item(i, 0).text())
         return stat
 
     def importUrls(self):
@@ -175,24 +194,26 @@ class Window(QMainWindow, Ui_MainWindow):
             # self.tree.ctrlOff(False)
 
     def newFile(self):
-        '''
+        """
         Intialize new window.
-        '''
+        """
         # If Window isn't empty,  create new Window
         if not self.empty_flag:
             window: Window = Window()
             window.show()
         self.keyReleaseEvent(
-            QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0))
+            QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0)
+        )
 
     def openFile(self):
-        '''
+        """
         Intialize new window for existing file.
-        '''
+        """
         # Select path of the file
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Open", INITIAL_DIRECTORY, TXT_FILE_FILTER)
-        if file_path == '':
+            self, "Open", INITIAL_DIRECTORY, TXT_FILE_FILTER
+        )
+        if file_path == "":
             return None
 
         # If frame is empty, open file in itself, else open new window
@@ -203,11 +224,11 @@ class Window(QMainWindow, Ui_MainWindow):
             window.setStat(file_path)
             window.show()
         self.keyReleaseEvent(
-            QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0))
+            QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0)
+        )
 
     def removeUrl(self):
-        indices = [i.row()
-                   for i in self.urlsTW.selectionModel().selectedRows()]
+        indices = [i.row() for i in self.urlsTW.selectionModel().selectedRows()]
         indices.reverse()
         for i in indices:
             self.urlsTW.removeRow(i)
@@ -218,36 +239,50 @@ class Window(QMainWindow, Ui_MainWindow):
         self.intialwidth = self.size().width()
         self.intialheight = self.size().height()
 
-        self.addUrlPB.move(self.addUrlPB.pos().x(),
-                           self.addUrlPB.pos().y() + incrementheight)
-        self.removeUrlPB.move(self.removeUrlPB.pos().x(),
-                              self.removeUrlPB.pos().y() + incrementheight)
-        self.executePB.move(self.executePB.pos().x(),
-                            self.executePB.pos().y() + incrementheight)
+        self.addUrlPB.move(
+            self.addUrlPB.pos().x(), self.addUrlPB.pos().y() + incrementheight
+        )
+        self.removeUrlPB.move(
+            self.removeUrlPB.pos().x(), self.removeUrlPB.pos().y() + incrementheight
+        )
+        self.executePB.move(
+            self.executePB.pos().x(), self.executePB.pos().y() + incrementheight
+        )
 
-        self.urlsTW.resize(self.urlsTW.size().width(),
-                           self.urlsTW.size().height() + incrementheight)
-        self.treeSA.resize(self.treeSA.size().width(
-        ) + incrementwidth, self.treeSA.size().height() + incrementheight)
+        self.urlsTW.resize(
+            self.urlsTW.size().width(), self.urlsTW.size().height() + incrementheight
+        )
+        self.treeSA.resize(
+            self.treeSA.size().width() + incrementwidth,
+            self.treeSA.size().height() + incrementheight,
+        )
 
-        if (self.treeSA.size().width() - self.frame.size().width()) * incrementwidth > 0:
+        if (
+            self.treeSA.size().width() - self.frame.size().width()
+        ) * incrementwidth > 0:
             pass
             # self.tree.width = self.treeSA.size().width()
-        if (self.treeSA.size().height() - self.frame.size().height()) * incrementheight > 0:
+        if (
+            self.treeSA.size().height() - self.frame.size().height()
+        ) * incrementheight > 0:
             pass
             # self.tree.height = self.treeSA.size().height()
 
         self.frame.adjustTree()
 
     def saveFile(self):
-        '''
+        """
         Save current window information.
-        '''
+        """
         # If window has no location to save, select a path
         if self.location == None:
-            file_path, _ = QFileDialog.getSaveFileName(self, "Save", os.path.join(
-                INITIAL_DIRECTORY, INITIAL_TITLE), TXT_FILE_FILTER)
-            if file_path == '':
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save",
+                os.path.join(INITIAL_DIRECTORY, INITIAL_TITLE),
+                TXT_FILE_FILTER,
+            )
+            if file_path == "":
                 return None
 
             # Split path into parent and title
@@ -264,20 +299,23 @@ class Window(QMainWindow, Ui_MainWindow):
             return None
 
         # Saving window information to file
-        with open(self.location, 'w', encoding='utf-8') as fle:
+        with open(self.location, "w", encoding="utf-8") as fle:
             json.dump(self.getStat(), fle, ensure_ascii=False, indent=4)
         self.save_flag = False
         self.keyReleaseEvent(
-            QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0))
+            QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0)
+        )
 
     def savetoExcel(self):
         name = ""
         if self.saveto != None and not self.saveto[0]:
             name, _ = QFileDialog.getSaveFileName(
-                self, "Save Data to", self.saveto[1], "Excel(*.xlsx)")
+                self, "Save Data to", self.saveto[1], "Excel(*.xlsx)"
+            )
         else:
             name, _ = QFileDialog.getSaveFileName(
-                self, "Save Data to", "untitled.xlsx", "Excel(*.xlsx)")
+                self, "Save Data to", "untitled.xlsx", "Excel(*.xlsx)"
+            )
         if name != "":
             self.saveDatato = [0, name]
             self.save_flag = True
@@ -286,19 +324,18 @@ class Window(QMainWindow, Ui_MainWindow):
     def setStat(self, files):
         try:
             stat = None
-            with open(files, 'r', encoding='utf-8') as fle:
+            with open(files, "r", encoding="utf-8") as fle:
                 stat = json.load(fle)
-            self.frame.setStat(stat['frame'])
-            self.progress = stat['progress']
-            self.saveDatato = stat['saveDatato']
+            self.frame.setStat(stat["frame"])
+            self.progress = stat["progress"]
+            self.saveDatato = stat["saveDatato"]
             # self.tree.setStat(stat['tree'])
-            for url in stat['urls']:
+            for url in stat["urls"]:
                 self.addUrl(url)
             self.save_flag = False
             self.saveto = files
-            self.setWindowTitle(os.path.split(self.saveto)[1] + '- AutomScra')
+            self.setWindowTitle(os.path.split(self.saveto)[1] + "- AutomScra")
         except:
-            QMessageBox.warning(
-                self, 'Alert', "File is corrupted or does not exist.")
+            QMessageBox.warning(self, "Alert", "File is corrupted or does not exist.")
             self.saveto = files
             self.close()
