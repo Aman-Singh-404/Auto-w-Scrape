@@ -42,10 +42,10 @@ class Tree:
         self.frame.setFixedSize(self.width, self.height)
 
         for item in level_items:
-            self.Head[item].move(x, y)
+            self.Head[item].move(int(x), int(y))
             x += label + width_spacing
         self.frame.updateconnector(level_items)
-        return x, y
+        return int(x), int(y)
 
     def changeLevels(self, level):
         for key, value in self.Head.items():

@@ -181,7 +181,7 @@ class ProgressView(QDialog):
                 conn = engine.connect()
                 df_total.to_sql(self.saveto[2], conn)
                 conn.close()
-                db.dispose()
+                engine.dispose()
             else:
                 df_total.to_excel(self.saveto[1], index=False)
         QMessageBox.about(self, "Information", "Process is completed.")

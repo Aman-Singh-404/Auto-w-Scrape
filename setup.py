@@ -1,10 +1,10 @@
 import json
 import sys
+import traceback
 
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
 from Structure.Window import Window
-import traceback
 
 
 class Controller:
@@ -86,7 +86,9 @@ class Controller:
         with open(self.log, "w", encoding="utf-8") as fle:
             json.dump(stat, fle, ensure_ascii=False, indent=4)
 
+
 controller = Controller()
+
 
 def excepthook(error_type, error_message, error_traceback):
     tracelog: str = "".join(

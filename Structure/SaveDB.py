@@ -12,6 +12,7 @@ class SaveDB(QDialog):
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
         self.setFixedSize(self.size())
+        self.engine_url = str_engine
 
         self.ui.tableLE.setText(table)
         if str_engine != "":
@@ -27,9 +28,8 @@ class SaveDB(QDialog):
 
     def run(self):
         if self.exec_():
-
             table = self.ui.tableLE.text()
-            return [str_engine, table]
+            return [self.engine_url, table]
         self.show()
 
     def verify(self):
@@ -48,10 +48,12 @@ class SaveDB(QDialog):
                 str_engine += self.ui.passwordLE.text().strip() + "@"
                 str_engine += self.ui.hostportLE.text().strip() + "/"
                 str_engine += self.ui.dbLE.text().strip()
-                engine = str_engine
+
+                engine = create_engine(str_engine)
                 conn = engine.connect()
                 conn.close()
                 engine.dispose()
+                self.engine_url = str_engine
                 self.accept()
             except:
                 QMessageBox.warning(self, "Alert", "Database URL not found.")

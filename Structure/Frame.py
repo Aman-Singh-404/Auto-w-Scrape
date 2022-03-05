@@ -32,6 +32,10 @@ class Frame(QFrame):
         clearallA.triggered.connect(self.clearAll)
         self.menu.addAction(clearallA)
 
+        browsermodeA = QAction("Edit with Browser", self)
+        browsermodeA.triggered.connect(self.clearAll)
+        self.menu.addAction(browsermodeA)
+
         self.show()
 
     def clearAll(self):
