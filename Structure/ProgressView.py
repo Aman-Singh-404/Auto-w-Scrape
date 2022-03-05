@@ -28,14 +28,14 @@ class ProgressView(QDialog):
             index_dict[node] = 0
         self.driver = Driver(self, pathlist, self.urllist, index_dict)
         self.threads = []
-        
+
         self.ui.closePB.clicked.connect(self.reject)
         self.ui.executePB.clicked.connect(self.execute)
         self.ui.pausePB.clicked.connect(self.pauseStatus)
         self.ui.cancelPB.clicked.connect(self.changeStatus)
         self.ui.savePB.clicked.connect(self.changeStatus)
         self.ui.stopPB.clicked.connect(self.changeStatus)
-    
+
     def changeStatus(self):
         sender = self.sender().text()
         if sender == "Cancel URL":
@@ -44,7 +44,7 @@ class ProgressView(QDialog):
             self.driver.status_code = 2
         else:
             self.driver.status_code = 3
-    
+
     def checkBrowser(self):
         try:
             path = "Webdriver/Chrome/"
@@ -62,12 +62,12 @@ class ProgressView(QDialog):
                 operating = sys.platform
                 bitsize = platform.architecture()[0][0]
                 if operating == "linux":
-                    if bitsize == '6':
+                    if bitsize == "6":
                         path += "linux64"
                     else:
                         path += "linux32"
                 elif operating == "win32":
-                    if bitsize == '6':
+                    if bitsize == "6":
                         path += "win64.exe"
                     else:
                         path += "win32.exe"
@@ -75,11 +75,19 @@ class ProgressView(QDialog):
                     path += "mac"
                 return "Firefox", path
             except:
-                QMessageBox.warning(self, "Alert", "System doesn't have firfox or chrome browser.")
-    
+                QMessageBox.warning(
+                    self, "Alert", "System doesn't have firfox or chrome browser."
+                )
+
     def closeEvent(self, event):
         if not self.ui.closePB.isEnabled():
-            reply = QMessageBox.question(self, 'Alert', 'You will lost all scraped data.',QMessageBox.Cancel | QMessageBox.Ok, QMessageBox.Cancel)
+            reply = QMessageBox.question(
+                self,
+                "Alert",
+                "You will lost all scraped data.",
+                QMessageBox.Cancel | QMessageBox.Ok,
+                QMessageBox.Cancel,
+            )
             if reply == QMessageBox.Ok:
                 event.accept()
                 for thread in self.threads:
@@ -89,7 +97,7 @@ class ProgressView(QDialog):
                 event.ignore()
         else:
             event.accept()
-    
+
     @pyqtSlot()
     def decrementIndex(self):
         self.index -= 1
@@ -102,7 +110,12 @@ class ProgressView(QDialog):
             self.ui.executePB.setEnabled(False)
 
             self.ui.label_2.setEnabled(True)
-            self.ui.label_2.setText("Wait! Process is ongoing...\n" + str(self.index + 1) + ". " + self.urllist[self.index])
+            self.ui.label_2.setText(
+                "Wait! Process is ongoing...\n"
+                + str(self.index + 1)
+                + ". "
+                + self.urllist[self.index]
+            )
             self.ui.progressPB.setEnabled(True)
             self.ui.pausePB.setEnabled(True)
             self.ui.cancelPB.setEnabled(True)
@@ -118,16 +131,21 @@ class ProgressView(QDialog):
             thread.start()
         else:
             self.reject()
-    
+
     @pyqtSlot()
     def notify(self):
         if self.index + 1 == len(self.urllist):
             self.ui.progressPB.setValue(100)
         else:
             self.index += 1
-            self.ui.label_2.setText("Wait! Process is ongoing...\n" + str(self.index + 1) + ". " + self.urllist[self.index])
+            self.ui.label_2.setText(
+                "Wait! Process is ongoing...\n"
+                + str(self.index + 1)
+                + ". "
+                + self.urllist[self.index]
+            )
             self.ui.progressPB.setValue(int(self.index * self.stepsize))
-    
+
     def pauseStatus(self):
         if self.ui.pausePB.text() == "Pause":
             self.ui.pausePB.setText("Resume")
@@ -140,7 +158,7 @@ class ProgressView(QDialog):
         if self.exec_():
             return self.ui.progressPB.value()
         self.show()
-    
+
     @pyqtSlot(list)
     def saveResult(self, datamatrix):
         for i in range(len(datamatrix)):
@@ -151,13 +169,13 @@ class ProgressView(QDialog):
                 datamatrix[i][1] = data_dict
         if len(datamatrix):
             df_total = pd.DataFrame(datamatrix[0][1])
-            df_total.insert(0, 'URL', datamatrix[0][0])
+            df_total.insert(0, "URL", datamatrix[0][0])
 
             for i in range(1, len(datamatrix)):
                 df = pd.DataFrame(datamatrix[i][1])
-                df.insert(0, 'URL', datamatrix[i][0])
+                df.insert(0, "URL", datamatrix[i][0])
                 df_total = df_total.append(df, ignore_index=True)
-            
+
             if self.saveto[0]:
                 engine = create_engine(self.saveto[1])
                 conn = engine.connect()
@@ -171,7 +189,7 @@ class ProgressView(QDialog):
             thread.quit()
             thread.wait()
         self.accept()
-    
+
     @pyqtSlot(str)
     def showError(self, msg):
         QMessageBox.warning(self, "Alert", msg)

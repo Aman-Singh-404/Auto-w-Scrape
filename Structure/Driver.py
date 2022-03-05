@@ -8,7 +8,11 @@ from bs4 import BeautifulSoup
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QMessageBox
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException, WebDriverException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    NoSuchWindowException,
+    WebDriverException,
+)
 from selenium.webdriver.support.ui import Select
 
 
@@ -34,7 +38,7 @@ class Driver(QObject):
         self.signalProgress.connect(parent.notify)
         self.signalReject.connect(parent.showError)
         self.signalSave.connect(parent.saveResult)
-    
+
     def checkStatus(self):
         while self.pause_code:
             self.driver.minimize_window()
@@ -43,7 +47,7 @@ class Driver(QObject):
 
     def converttoXPATH(self, tag):
         self.driver.minimize_window()
-        element = BeautifulSoup(tag, "lxml").find('body').findChild()
+        element = BeautifulSoup(tag, "lxml").find("body").findChild()
         xpath = "//" + element.name + "[@"
         if element.attrs == {}:
             return xpath[:-2]
@@ -52,8 +56,8 @@ class Driver(QObject):
                 xpath += key + "='" + " ".join(value) + "' and @"
             else:
                 xpath += key + "='" + value + "' and @"
-        return xpath[:-6] + ']'
-    
+        return xpath[:-6] + "]"
+
     def evaluateAction(self, node, path):
         self.checkStatus()
         self.driver.minimize_window()
@@ -66,7 +70,7 @@ class Driver(QObject):
 
             index = path.index(node)
             pre_path = path[:index]
-            post_path = path[index + 1:]
+            post_path = path[index + 1 :]
 
             elements[0].click()
             time.sleep(5)
@@ -101,15 +105,37 @@ class Driver(QObject):
                 return ["\n/@#$/\n".join([element.text for element in elements])]
         elif node.attribute[0] == "Media":
             if node.attribute[3]:
-                return [self.saveFile(elements[node.attribute[3] - 1], node.attribute[2], node.text())]
+                return [
+                    self.saveFile(
+                        elements[node.attribute[3] - 1], node.attribute[2], node.text()
+                    )
+                ]
             else:
-                return ["\n/@#$/\n".join([self.saveFile(element, node.attribute[2], node.text()) for element in elements])]
+                return [
+                    "\n/@#$/\n".join(
+                        [
+                            self.saveFile(element, node.attribute[2], node.text())
+                            for element in elements
+                        ]
+                    )
+                ]
         else:
             if node.attribute[3]:
-                return [self.saveSheet(elements[node.attribute[3] - 1], node.attribute[2], node.text())]
+                return [
+                    self.saveSheet(
+                        elements[node.attribute[3] - 1], node.attribute[2], node.text()
+                    )
+                ]
             else:
-                return ["\n/@#$/\n".join([self.saveSheet(element, node.attribute[2], node.text()) for element in elements])]
-    
+                return [
+                    "\n/@#$/\n".join(
+                        [
+                            self.saveSheet(element, node.attribute[2], node.text())
+                            for element in elements
+                        ]
+                    )
+                ]
+
     def evaluateInput(self, node):
         self.checkStatus()
         self.driver.minimize_window()
@@ -161,7 +187,11 @@ class Driver(QObject):
                         self.signalReject.emit("All URLs cancelled.")
                         return None
                     else:
-                        defaulter = [index for index in range(len(dataMatrix)) if dataMatrix[index][0] == self.urlList[i]]
+                        defaulter = [
+                            index
+                            for index in range(len(dataMatrix))
+                            if dataMatrix[index][0] == self.urlList[i]
+                        ]
                         defaulter.reverse()
                         for index in defaulter:
                             dataMatrix.pop(index)
@@ -204,23 +234,23 @@ class Driver(QObject):
         if flag:
             value = self.state.pop()
             if value[0] == "Same":
-                    self.driver.back()
+                self.driver.back()
             else:
                 self.driver.close()
                 self.driver.switch_to.window(self.driver.window_handles[-1])
                 self.tab -= 1
             self.driver.refresh()
         return dataList
-    
+
     def get(self, browser, path):
         if browser == "Firefox":
             self.driver = webdriver.Firefox(executable_path=path)
         else:
             self.driver = webdriver.Chrome(executable_path=path)
         self.driver.minimize_window()
-        self.driver.set_window_position(0,0)
-        self.driver.set_window_size(600,600)
-    
+        self.driver.set_window_position(0, 0)
+        self.driver.set_window_size(600, 600)
+
     def saveFile(self, element, path, prefix):
         src = ""
         if element.get_attribute("src") != None:
@@ -228,20 +258,20 @@ class Driver(QObject):
         elif element.get_attribute("href") != None:
             src = element.get_attribute("href")
         else:
-            tag = element.get_attribute('outerHTML')
+            tag = element.get_attribute("outerHTML")
             sre = re.search("(?P<url>https?://[^\s]+)", tag)
             raw_url = sre.group("url")
-            src = raw_url[:raw_url.find(tag[sre.span()[0]-1])]
-        req = requests.get(src, stream = True)
+            src = raw_url[: raw_url.find(tag[sre.span()[0] - 1])]
+        req = requests.get(src, stream=True)
         path, base = os.path.split(path)
         base = prefix + "_" + str(self.index_dict[prefix]) + "_" + base
         self.index_dict[prefix] += 1
         fname = os.path.join(path, base)
-        with open(fname,'wb') as fle:
+        with open(fname, "wb") as fle:
             fle.write(req.content)
         self.file_Data.append(fname)
         return fname
-    
+
     def saveSheet(self, element, path, prefix):
         try:
             path, base = os.path.split(path)
@@ -254,7 +284,7 @@ class Driver(QObject):
             return fname
         except:
             return " NO_TABLE_FOUND_" + prefix
-    
+
     def wait(self, xpath, delay=10):
         self.driver.minimize_window()
         elements = self.driver.find_elements_by_xpath(xpath)

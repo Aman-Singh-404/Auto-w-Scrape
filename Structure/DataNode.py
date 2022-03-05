@@ -17,7 +17,7 @@ class DataNode(QDialog):
 
         for i in range(levels):
             self.ui.levelCB.addItem("Level " + str(i + 1))
-        
+
         self.ui.levelCB.setCurrentText(level)
         self.ui.typeCB.setCurrentText(file_type)
         self.ui.typeCB.currentTextChanged.connect(self.changeWindow)
@@ -27,10 +27,10 @@ class DataNode(QDialog):
         self.changeWindow(file_type)
         self.setLabel(path)
 
-        self.ui.browsePB.clicked.connect(self.openBrowse)        
+        self.ui.browsePB.clicked.connect(self.openBrowse)
         self.ui.buttonBox.accepted.connect(self.verify)
         self.ui.buttonBox.rejected.connect(self.reject)
-    
+
     def changeWindow(self, value):
         if value == "Text":
             self.ui.browsePB.hide()
@@ -42,7 +42,7 @@ class DataNode(QDialog):
             self.ui.browseL.show()
             self.ui.buttonBox.move(179, 165)
             self.setFixedSize(350, 195)
-    
+
     def checkHTML(self, string):
         string = re.findall(r"^\<(.*?)\>", string.strip())
         if len(string) != 1:
@@ -55,8 +55,8 @@ class DataNode(QDialog):
             return True
         occur = string.count("=")
         cover = re.findall(r"=\s*(.*)", string)
-        if occur != 0 :
-            if cover == [''] or cover[0][0] not in ['"', "'"]:
+        if occur != 0:
+            if cover == [""] or cover[0][0] not in ['"', "'"]:
                 return False
             else:
                 cover = cover[0][0]
@@ -67,16 +67,18 @@ class DataNode(QDialog):
             if arg0 != "":
                 occur -= 1
         return not bool(occur)
-    
+
     def openBrowse(self):
-        files = ''
+        files = ""
         if self.ui.typeCB.currentText() == "Media":
             files, _ = QFileDialog.getSaveFileName(self, "Select file", self.path)
         else:
-            files, _ = QFileDialog.getSaveFileName(self, "Select file", self.path, "Excel(*.xlsx)")
-        if files != '':
+            files, _ = QFileDialog.getSaveFileName(
+                self, "Select file", self.path, "Excel(*.xlsx)"
+            )
+        if files != "":
             self.setLabel(files)
-    
+
     def run(self):
         if self.exec_():
             level = int(self.ui.levelCB.currentText()[6:]) - 1
@@ -91,7 +93,7 @@ class DataNode(QDialog):
     def setLabel(self, files):
         self.path = files
         if len(os.path.split(self.path)[1]) > 15:
-            self.ui.browseL.setText(os.path.split(self.path)[1][:15]+"...")
+            self.ui.browseL.setText(os.path.split(self.path)[1][:15] + "...")
         else:
             self.ui.browseL.setText(os.path.split(self.path)[1])
 

@@ -63,11 +63,22 @@ class Tree:
         attribute = None
         lbl = self.Head[node]
         if self.Head[node].method == "Action":
-            attribute = self.dialogbox.getAction(levels, lbl.level, lbl.attribute[0], lbl.attribute[1])
+            attribute = self.dialogbox.getAction(
+                levels, lbl.level, lbl.attribute[0], lbl.attribute[1]
+            )
         elif self.Head[node].method == "Input":
-            attribute = self.dialogbox.getInput(levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2])
+            attribute = self.dialogbox.getInput(
+                levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2]
+            )
         else:
-            attribute = self.dialogbox.getData(levels, lbl.level, lbl.attribute[0], lbl.attribute[1], lbl.attribute[2], lbl.attribute[3])
+            attribute = self.dialogbox.getData(
+                levels,
+                lbl.level,
+                lbl.attribute[0],
+                lbl.attribute[1],
+                lbl.attribute[2],
+                lbl.attribute[3],
+            )
         if attribute == None:
             return None
         level = self.Head[node].level
@@ -91,8 +102,18 @@ class Tree:
                 faulter[1].append(item)
         if faulter == [[], []]:
             return True
-        message = "Element has connector(s) in level " + str(level + 1) + ".\nDo you want to update?"
-        reply = QMessageBox.question(self.frame, 'Alert', message, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        message = (
+            "Element has connector(s) in level "
+            + str(level + 1)
+            + ".\nDo you want to update?"
+        )
+        reply = QMessageBox.question(
+            self.frame,
+            "Alert",
+            message,
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
         if reply == QMessageBox.Yes:
             self.frame.deleteConnector(label, faulter)
             return True
@@ -136,12 +157,16 @@ class Tree:
 
     def getAllPath(self):
         if self.Head == {}:
-            QMessageBox.warning(self.frame, 'Alert', "Frame is empty.")
+            QMessageBox.warning(self.frame, "Alert", "Frame is empty.")
             return None, []
         header = []
         for key, label in self.Head.items():
             if label.level != 0 and label.parents == []:
-                QMessageBox.warning(self.frame, 'Alert', "Some labels have no parents [Excluding Level 1 nodes].")
+                QMessageBox.warning(
+                    self.frame,
+                    "Alert",
+                    "Some labels have no parents [Excluding Level 1 nodes].",
+                )
                 return None, []
             if label.text()[0] == "D":
                 header.append(label.text())
@@ -170,13 +195,13 @@ class Tree:
 
     def getStat(self):
         stat = {}
-        stat['action'] = self.action
-        stat['data'] = self.data
-        stat['head'] = {}
+        stat["action"] = self.action
+        stat["data"] = self.data
+        stat["head"] = {}
         for label, item in self.Head.items():
-            stat['head'][label] = item.getStat()
-        stat['input'] = self.input
-        stat['maxlevel'] = self.maxLevel
+            stat["head"][label] = item.getStat()
+        stat["input"] = self.input
+        stat["maxlevel"] = self.maxLevel
         return stat
 
     def removeAllNode(self):
@@ -203,8 +228,16 @@ class Tree:
             value = self.Head[key]
             reply = None
             if len(self.getLevelItems(self.Head[key].level)) == 1:
-                message = "This is last element of this level.\nDo you want to delete it?"
-                reply = QMessageBox.question(self.frame, 'Alert', message, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                message = (
+                    "This is last element of this level.\nDo you want to delete it?"
+                )
+                reply = QMessageBox.question(
+                    self.frame,
+                    "Alert",
+                    message,
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No,
+                )
             if reply == QMessageBox.No:
                 continue
             self.frame.deleteConnector(key, [value.parents.copy(), value.childs.copy()])
@@ -237,13 +270,15 @@ class Tree:
         self.frame.mwindow.save_flag = True
 
     def setStat(self, stat):
-        self.action = stat['action']
-        self.data = stat['data']
-        for label, item in stat['head'].items():
-            self.Head[label] = Label([self.frame, self] + item['args'])
-            self.Head[label].childs = item['childs']
-            self.Head[label].parents = item['parents']
-            self.Head[label].order = datetime.datetime.strptime(item['order'], '%Y-%m-%d %H:%M:%S.%f')
-        self.input = stat['input']
-        self.maxLevel = stat['maxlevel']
+        self.action = stat["action"]
+        self.data = stat["data"]
+        for label, item in stat["head"].items():
+            self.Head[label] = Label([self.frame, self] + item["args"])
+            self.Head[label].childs = item["childs"]
+            self.Head[label].parents = item["parents"]
+            self.Head[label].order = datetime.datetime.strptime(
+                item["order"], "%Y-%m-%d %H:%M:%S.%f"
+            )
+        self.input = stat["input"]
+        self.maxLevel = stat["maxlevel"]
         self.setRelativeSize()

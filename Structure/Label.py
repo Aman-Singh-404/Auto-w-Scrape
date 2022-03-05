@@ -29,7 +29,8 @@ class Label(QLabel):
         self.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
 
         self.menu = QMenu(self)
-        self.menu.setStyleSheet("""
+        self.menu.setStyleSheet(
+            """
             QMenu::item {
                 background-color: #ffffff;
                 color: #000000;
@@ -38,20 +39,23 @@ class Label(QLabel):
                 background-color: #308cc6;
                 color: #ffffff;
             }
-        """)
+        """
+        )
 
-        changeA = QAction('Change property', self)
+        changeA = QAction("Change property", self)
         changeA.triggered.connect(self.mouseDoubleClickEvent)
         self.menu.addAction(changeA)
 
-        deleteA = QAction('Delete node', self)
+        deleteA = QAction("Delete node", self)
         deleteA.setShortcut("Del")
         deleteA.triggered.connect(self.tree.removeNode)
         self.menu.addAction(deleteA)
         self.show()
 
     def clear(self):
-        self.setStyleSheet("background: #EFEFEF; color: #000000;border: 1px solid #000000; border-radius: 5%;")
+        self.setStyleSheet(
+            "background: #EFEFEF; color: #000000;border: 1px solid #000000; border-radius: 5%;"
+        )
         self.border_flag = True
 
     def contextMenuEvent(self, event):
@@ -60,10 +64,16 @@ class Label(QLabel):
 
     def getStat(self):
         stat = {}
-        stat['args'] = [self.text(), self.pos().x(), self.pos().y(), self.method, self.level] + self.attribute
-        stat['childs'] = self.childs
-        stat['parents'] = self.parents
-        stat['order'] = str(self.order)
+        stat["args"] = [
+            self.text(),
+            self.pos().x(),
+            self.pos().y(),
+            self.method,
+            self.level,
+        ] + self.attribute
+        stat["childs"] = self.childs
+        stat["parents"] = self.parents
+        stat["order"] = str(self.order)
         return stat
 
     def mouseDoubleClickEvent(self, event):
@@ -74,8 +84,15 @@ class Label(QLabel):
         if not self.conn_flag:
             self.parent().indicateLabel(self.objectName(), self.pos())
         self.tree.clearSelection(self.text())
-        if self.border_flag or event.button() == Qt.RightButton or not self.conn_flag or not self.ctrl_signal:
-            self.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
+        if (
+            self.border_flag
+            or event.button() == Qt.RightButton
+            or not self.conn_flag
+            or not self.ctrl_signal
+        ):
+            self.setStyleSheet(
+                "background: #565656; color: #EFEFEF; border-radius: 5%;"
+            )
             self.border_flag = False
             self.tree.ctrlOff(True)
         else:

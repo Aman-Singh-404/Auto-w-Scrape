@@ -32,7 +32,9 @@ class ConnectorView(QDialog):
         label = QLabel(parent=self.spanF)
         x = (self.label + self.spacing) * x + self.spacing
         if x + self.label + self.spacing > self.spanF.size().width():
-            self.spanF.setFixedSize(x + self.label + self.spacing, self.spanF.size().height())
+            self.spanF.setFixedSize(
+                x + self.label + self.spacing, self.spanF.size().height()
+            )
         label.setGeometry(QRect(x, 10, self.label, self.label))
         font = QFont()
         font.setPointSize(14)
@@ -54,7 +56,9 @@ class ConnectorView(QDialog):
         for key, [value, flag] in self.connector.items():
             if QRect(value.pos(), QSize(40, 40)).contains(event.pos()):
                 if flag:
-                    value.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
+                    value.setStyleSheet(
+                        "background: #565656; color: #EFEFEF; border-radius: 5%;"
+                    )
                 else:
                     value.setStyleSheet("border: 1px solid #000000; border-radius: 5%;")
                     all_True = "Select All"
@@ -73,7 +77,9 @@ class ConnectorView(QDialog):
         text = ""
         for key, [value, flag] in self.connector.items():
             if self.ui.selectPB.text() == "Select All":
-                value.setStyleSheet("background: #565656; color: #EFEFEF; border-radius: 5%;")
+                value.setStyleSheet(
+                    "background: #565656; color: #EFEFEF; border-radius: 5%;"
+                )
                 text = "Deselect All"
                 self.connector[key][1] = False
             else:

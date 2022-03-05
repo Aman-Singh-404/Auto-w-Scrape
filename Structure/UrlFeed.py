@@ -29,14 +29,19 @@ class UrlFeed(QDialog):
 
     def importUrls(self):
         if self.filepath == None:
-            QMessageBox.warning(self, 'Alert', "No file selected!")
+            QMessageBox.warning(self, "Alert", "No file selected!")
             return None
         if self.ui.fileRB.isChecked():
             if self.ui.separatorLE.text() == "":
-                QMessageBox.warning(self, 'Alert', "Separator field is empty!")
+                QMessageBox.warning(self, "Alert", "Separator field is empty!")
                 return None
             else:
-                self.Urls = open(self.filepath, "r").read().replace("\n", "").split(self.ui.separatorLE.text())
+                self.Urls = (
+                    open(self.filepath, "r")
+                    .read()
+                    .replace("\n", "")
+                    .split(self.ui.separatorLE.text())
+                )
                 self.Urls = [x for x in self.Urls if x]
         else:
             df = None
@@ -49,11 +54,11 @@ class UrlFeed(QDialog):
 
     def openBrowse(self):
         files, _ = QFileDialog.getOpenFileName(self, "Select file", "", self.extension)
-        if files == '':
+        if files == "":
             return None
         self.filepath = files
         if len(os.path.split(self.filepath)[1]) > 15:
-            self.ui.browseL.setText(os.path.split(self.filepath)[1][:15]+"...")
+            self.ui.browseL.setText(os.path.split(self.filepath)[1][:15] + "...")
         else:
             self.ui.browseL.setText(os.path.split(self.filepath)[1])
 

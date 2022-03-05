@@ -38,13 +38,13 @@ class Connector(QRect):
 
     def getStat(self):
         stat = {}
-        stat['connectedEnds'] = self.connectedEnds
-        if self.text == 'P':
-            stat['inherit'] = 'parent'
-            stat['pos'] = [self.topLeft().x() - 10, self.topLeft().y() + 30]
+        stat["connectedEnds"] = self.connectedEnds
+        if self.text == "P":
+            stat["inherit"] = "parent"
+            stat["pos"] = [self.topLeft().x() - 10, self.topLeft().y() + 30]
         else:
-            stat['inherit'] = 'child'
-            stat['pos'] = [self.topLeft().x() - 10, self.topLeft().y() - 50]
+            stat["inherit"] = "child"
+            stat["pos"] = [self.topLeft().x() - 10, self.topLeft().y() - 50]
         return stat
 
     def updateConnector(self, pos):

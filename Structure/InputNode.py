@@ -14,17 +14,17 @@ class InputNode(QDialog):
 
         for i in range(levels):
             self.ui.levelCB.addItem("Level " + str(i + 1))
-        
+
         self.ui.levelCB.setCurrentText(level)
         self.ui.typeCB.setCurrentText(tag_type)
         self.ui.typeCB.currentTextChanged.connect(self.changeWindow)
         self.ui.tagLE.setText(tag)
         self.ui.valueTE.setText(value)
         self.changeWindow(tag_type)
-        
+
         self.ui.buttonBox.accepted.connect(self.verify)
         self.ui.buttonBox.rejected.connect(self.reject)
-    
+
     def changeWindow(self, value):
         if value == "Text/Combo Box":
             self.ui.label_4.hide()
@@ -36,7 +36,7 @@ class InputNode(QDialog):
             self.ui.valueTE.hide()
             self.ui.buttonBox.move(179, 100)
             self.setFixedSize(350, 130)
-    
+
     def checkHTML(self, string):
         string = re.findall(r"^\<(.*?)\>", string.strip())
         if len(string) != 1:
@@ -49,8 +49,8 @@ class InputNode(QDialog):
             return True
         occur = string.count("=")
         cover = re.findall(r"=\s*(.*)", string)
-        if occur != 0 :
-            if cover == [''] or cover[0][0] not in ['"', "'"]:
+        if occur != 0:
+            if cover == [""] or cover[0][0] not in ['"', "'"]:
                 return False
             else:
                 cover = cover[0][0]
@@ -61,7 +61,7 @@ class InputNode(QDialog):
             if arg0 != "":
                 occur -= 1
         return not bool(occur)
-    
+
     def run(self):
         if self.exec_():
             level = int(self.ui.levelCB.currentText()[6:]) - 1
@@ -74,7 +74,10 @@ class InputNode(QDialog):
     def verify(self):
         if not self.checkHTML(self.ui.tagLE.text()):
             QMessageBox.warning(self, "Alert", "HTML tag is invalid.")
-        elif self.ui.typeCB.currentText() == "Text/Combo Box" and self.ui.valueTE.toPlainText() == "":
+        elif (
+            self.ui.typeCB.currentText() == "Text/Combo Box"
+            and self.ui.valueTE.toPlainText() == ""
+        ):
             QMessageBox.warning(self, "Alert", "Text box is empty.")
         else:
             self.accept()
