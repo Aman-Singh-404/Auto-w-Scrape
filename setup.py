@@ -16,7 +16,7 @@ class Controller:
         controller_count = self.read("controller_count")
         self.write("controller_count", controller_count + 1)
 
-    def addWindow(self, open_file=""):
+    def addWindow(self, open_file="", flag=True):
         reusable_titles = self.read("reusable_titles")
         index = self.read("index")
         window = None
@@ -31,7 +31,10 @@ class Controller:
         self.main_window.append(window)
         if open_file != "":
             self.setValue("defaulter_files", open_file)
-            window.setStat(open_file)
+            if flag:
+                window.setStat(open_file)
+            else:
+                window.readJson(open_file)
 
     def check(self, label, value):
         dataFile = self.read(label)

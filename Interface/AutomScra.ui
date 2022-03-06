@@ -74,10 +74,10 @@
     <property name="columnCount">
      <number>1</number>
     </property>
-    <attribute name="horizontalHeaderDefaultSectionSize">
+    <attribute name="horizontalHeaderMinimumSectionSize">
      <number>200</number>
     </attribute>
-    <attribute name="horizontalHeaderMinimumSectionSize">
+    <attribute name="horizontalHeaderDefaultSectionSize">
      <number>200</number>
     </attribute>
     <attribute name="verticalHeaderDefaultSectionSize">
@@ -271,6 +271,7 @@
     </widget>
     <addaction name="actionUrls"/>
     <addaction name="menuExceute"/>
+    <addaction name="actionKatalon"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -325,6 +326,11 @@
   <action name="actionExecute">
    <property name="text">
     <string>Execute scraper</string>
+   </property>
+  </action>
+  <action name="actionKatalon">
+   <property name="text">
+    <string>Import Katalon Json</string>
    </property>
   </action>
  </widget>

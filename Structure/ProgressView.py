@@ -1,10 +1,9 @@
 import platform
 import sys
-from threading import Thread
 
 import pandas as pd
 from PyQt5.QtWidgets import QApplication, QDialog, QMessageBox
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, pyqtSlot
 from sqlalchemy import create_engine
 
 from Interface.UI_progressView import Ui_Dialog

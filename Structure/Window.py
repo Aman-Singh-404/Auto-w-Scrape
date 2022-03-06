@@ -1,13 +1,16 @@
 import json
 import os
+import re
 
 from PyQt5.QtCore import QEvent, Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem
+from click import command
 
 from Interface.UI_AutomScra import Ui_MainWindow
 from Structure.DialogBox import DialogBox
 from Structure.Frame import Frame
+from Structure.Label import Label
 from Structure.ProgressView import ProgressView
 from Structure.SaveDB import SaveDB
 from Structure.Tree import Tree
@@ -53,6 +56,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.actionUrls.triggered.connect(self.importUrls)
         self.actionsaveExcel.triggered.connect(self.savetoExcel)
         self.actionsaveDB.triggered.connect(self.savetoDB)
+        self.actionKatalon.triggered.connect(self.importKatalonJson)
         self.addUrlPB.clicked.connect(self.addUrl)
         self.removeUrlPB.clicked.connect(self.removeUrl)
         self.action_nodePB.clicked.connect(self.actionNode)
@@ -191,6 +195,18 @@ class Window(QMainWindow, Ui_MainWindow):
             stat["urls"].append(self.urlsTW.item(i, 0).text())
         return stat
 
+    def importKatalonJson(self):
+        files, _ = QFileDialog.getOpenFileName(
+            self, "Select file", "", "Json Files(*.json)"
+        )
+        if files == "":
+            return None
+
+        if self.empty_flag:
+            self.readJson(files)
+        else:
+            self.controller.addWindow(files, False)
+
     def importUrls(self):
         urlfeed = UrlFeed(self)
         for url in urlfeed.run():
@@ -244,6 +260,60 @@ class Window(QMainWindow, Ui_MainWindow):
         self.keyReleaseEvent(
             QKeyEvent(QEvent.KeyPress, Qt.Key_Control, Qt.NoModifier, 0, 0, 0)
         )
+
+    def readJson(self, files):
+        data = []
+        try:
+            with open(files, "r", encoding="utf-8") as fle:
+                data = json.load(fle)
+        except:
+            QMessageBox.warning(self, "Alert", "File is corrupted or does not exist.")
+            return None
+
+        level = 0
+        stat = {}
+        for json_obj in data:
+            if json_obj["command"] == "click":
+                attribute = [level, "Click", self.xpathtohtml(json_obj["target"])]
+                self.tree.createNode("Action", attribute)
+            elif json_obj["command"] == "type":
+                attribute = [
+                    level,
+                    "Text/Combo Box",
+                    self.xpathtohtml(json_obj["target"]),
+                    json_obj["value"],
+                ]
+                self.tree.createNode("Input", attribute)
+            else:
+                level -= 1
+            parents = self.tree.getLevelItems(level - 1)
+            children = self.tree.getLevelItems(level)
+            if children != []:
+                stat[children[0]] = [None, None]
+            if parents != [] and children != []:
+                stat[parents[0]][1] = {
+                    "connectedEnds": [children[0]],
+                    "inherit": "child",
+                    "pos": [
+                        self.tree.Head[parents[0]].pos().x(),
+                        self.tree.Head[parents[0]].pos().y(),
+                    ],
+                }
+                stat[children[0]][0] = {
+                    "connectedEnds": [parents[0]],
+                    "inherit": "parent",
+                    "pos": [
+                        self.tree.Head[children[0]].pos().x(),
+                        self.tree.Head[children[0]].pos().y(),
+                    ],
+                }
+
+                pass
+            level += 1
+        self.treeF.setStat(stat)
+        if len(data) != 0:
+            self.save_flag = True
+            self.empty_flag = False
 
     def removeUrl(self):
         indices = [i.row() for i in self.urlsTW.selectionModel().selectedRows()]
@@ -357,3 +427,12 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, "Alert", "File is corrupted or does not exist.")
             self.saveto = files
             self.close()
+
+    def xpathtohtml(self, xpath):
+        xpath = xpath[6:]
+        result = re.findall(r"\/\/.*\/(.*)", xpath)
+        if result != []:
+            return f"<{result[0]}>"
+        else:
+            result = re.findall(r"\/\/([a-z]*)\[@([a-z]*)=(.*)\]", xpath)[0]
+            return f"<{result[0]} {result[1]}={result[2]}>"

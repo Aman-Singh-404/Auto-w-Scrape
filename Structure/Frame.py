@@ -32,10 +32,6 @@ class Frame(QFrame):
         clearallA.triggered.connect(self.clearAll)
         self.menu.addAction(clearallA)
 
-        browsermodeA = QAction("Edit with Browser", self)
-        browsermodeA.triggered.connect(self.clearAll)
-        self.menu.addAction(browsermodeA)
-
         self.show()
 
     def clearAll(self):
@@ -62,7 +58,7 @@ class Frame(QFrame):
                         self.current_conn = key
                     select = key
                     state = 0
-                elif not conn[0].contains(pos) or label:
+                elif not conn[0].contains(pos) or self.label:
                     conn[0].selected = True
             if conn[1] != None:
                 if conn[1].contains(pos):
@@ -73,7 +69,7 @@ class Frame(QFrame):
                         self.current_conn = key
                     select = key
                     state = 1
-                elif not conn[1].contains(pos) or label:
+                elif not conn[1].contains(pos) or self.label:
                     conn[1].selected = True
         if select == None:
             self.update()

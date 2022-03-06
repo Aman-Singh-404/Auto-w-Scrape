@@ -5,12 +5,10 @@ import time
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QObject, pyqtSignal
 from selenium import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
-    NoSuchWindowException,
     WebDriverException,
 )
 from selenium.webdriver.support.ui import Select
