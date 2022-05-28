@@ -166,11 +166,21 @@ class ProgressView(QDialog):
                 for key in self.header:
                     data_dict[key] = [datamatrix[i][1]]
                 datamatrix[i][1] = data_dict
+
         if len(datamatrix):
+            result = max([len(i) for i in datamatrix[0][1].values()])
+            for key, value in datamatrix[0][1].items():
+                datamatrix[0][1][key] += [
+                    "" for _ in range(result - len(datamatrix[0][1][key]))
+                ]
             df_total = pd.DataFrame(datamatrix[0][1])
             df_total.insert(0, "URL", datamatrix[0][0])
 
             for i in range(1, len(datamatrix)):
+                for key, value in datamatrix[i][1].items():
+                    datamatrix[i][1][key] += [
+                        "" for _ in range(result - len(datamatrix[i][1][key]))
+                    ]
                 df = pd.DataFrame(datamatrix[i][1])
                 df.insert(0, "URL", datamatrix[i][0])
                 df_total = df_total.append(df, ignore_index=True)

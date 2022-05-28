@@ -100,7 +100,7 @@ class Driver(QObject):
             if node.attribute[3]:
                 [elements[node.attribute[3] - 1].text]
             else:
-                return ["\n/@#$/\n".join([element.text for element in elements])]
+                return [element.text for element in elements]
         elif node.attribute[0] == "Media":
             if node.attribute[3]:
                 return [
@@ -110,12 +110,8 @@ class Driver(QObject):
                 ]
             else:
                 return [
-                    "\n/@#$/\n".join(
-                        [
-                            self.saveFile(element, node.attribute[2], node.text())
-                            for element in elements
-                        ]
-                    )
+                    self.saveFile(element, node.attribute[2], node.text())
+                    for element in elements
                 ]
         else:
             if node.attribute[3]:
@@ -126,12 +122,8 @@ class Driver(QObject):
                 ]
             else:
                 return [
-                    "\n/@#$/\n".join(
-                        [
-                            self.saveSheet(element, node.attribute[2], node.text())
-                            for element in elements
-                        ]
-                    )
+                    self.saveSheet(element, node.attribute[2], node.text())
+                    for element in elements
                 ]
 
     def evaluateInput(self, node):
